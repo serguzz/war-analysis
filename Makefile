@@ -6,6 +6,12 @@ build:
 run:
 	docker compose run --rm app
 
+read_data:
+	docker compose run --rm app python scripts/read_ods.py
+
+month_diagram:
+	docker compose run --rm app python scripts/month_diagram.py
+
 up:
 	docker compose up
 
