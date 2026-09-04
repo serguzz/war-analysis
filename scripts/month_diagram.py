@@ -109,7 +109,7 @@ def main() -> None:
 
     plt.tight_layout()
     
-    output_path = BASE_DIR / "data" / "processed" / "month_diagram_all.png"
+    output_path = BASE_DIR / "data" / "processed" / f"monthly_sheptytskiy_fb_data_{DATE_START}_{DATE_END}.png"
 
     output_path.parent.mkdir(
         parents=True,

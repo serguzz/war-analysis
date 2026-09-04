@@ -17,7 +17,7 @@ OUTPUT_PATH = (
     BASE_DIR
     / "data"
     / "processed"
-    / "ualosses_monthly.png"
+    / f"ualosses_monthly_{DATE_START:%Y-%m-%d}_{DATE_END:%Y-%m-%d}.png"
 )
 
 
