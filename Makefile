@@ -12,6 +12,9 @@ read_data:
 month_diagram:
 	docker compose run --rm app python scripts/month_diagram.py
 
+ualosses_demo:
+	docker compose run --rm app python scripts/ualosses_demo.py
+
 up:
 	docker compose up
 
