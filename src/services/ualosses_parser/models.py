@@ -1,0 +1,1 @@
+# Data models for UA Losses parser will be added here.

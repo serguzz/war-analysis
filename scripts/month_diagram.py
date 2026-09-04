@@ -109,7 +109,7 @@ def main() -> None:
 
     plt.tight_layout()
     
-    output_path = BASE_DIR / "data" / "processed" / "month_diagram.png"
+    output_path = BASE_DIR / "data" / "processed" / "month_diagram_all.png"
 
     output_path.parent.mkdir(
         parents=True,
@@ -121,6 +121,6 @@ def main() -> None:
         dpi=150,
         bbox_inches="tight",
     )
-    
+
 if __name__ == "__main__":
     main()
