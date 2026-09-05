@@ -1,6 +1,7 @@
 # Data models for UA Losses parser will be added here
 
 from dataclasses import dataclass
+from datetime import date
 
 
 @dataclass
@@ -26,13 +27,15 @@ class Location:
 class Soldier:
     name: str
 
-    date_of_birth: str | None = None
-    date_of_death: str | None = None
-    date_of_burial: str | None = None
+    date_of_birth: date | None = None
+    date_of_disappearance: date | None = None
+    date_of_death: date | None = None
+    date_of_burial: date | None = None
 
     conscription: str | None = None
 
     from_location: Location | None = None
+    disappeared_in: Location | None = None
     died_in: Location | None = None
     buried_in: Location | None = None
 
