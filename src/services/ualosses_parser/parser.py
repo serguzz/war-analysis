@@ -149,6 +149,10 @@ class UALossesParser:
                 soup,
                 "Date of disappearance",
             ),
+            date_of_release_from_captivity=self._parse_date_field(
+                soup,
+                "Date of release from captivity",
+            ),
             date_of_burial=self._parse_date_field(
                 soup,
                 "Date of burial",
@@ -229,7 +233,7 @@ class UALossesParser:
 
         text = value.get_text(" ", strip=True)
 
-        if not text or text == "?":
+        if not text or text in {"?", "Unknown", "unknown"}:
             return None
 
         return text

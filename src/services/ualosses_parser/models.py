@@ -31,6 +31,7 @@ class Soldier:
     date_of_disappearance: date | None = None
     date_of_death: date | None = None
     date_of_burial: date | None = None
+    date_of_release_from_captivity: date | None = None
 
     conscription: str | None = None
 
