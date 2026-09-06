@@ -1,4 +1,14 @@
-from datetime import date
+"""
+https://ualosses.org/en/soldiers/?page=499&dob_start=&dob_end=&dod_start=&dod_end=&military_unit=&first_name=&last_name=&military_rank=&category=&casualty_type=&sort=dob&direction=asc
+https://ualosses.org/en/soldiers/?page=499&sort=dob&direction=asc&dob_start=1977-02-22
+
+https://ualosses.org/en/soldiers/?page=1&dod_start=01.01.2014&dod_end=01.09.2026&sort=dod&direction=asc&
+this works if there is date of death in the info.
+
+https://ualosses.org/en/soldiers/?page=1&sort=last_name&direction=desc
+This works for sorting by last names.
+"""
+
 from pathlib import Path
 
 from src.services.ualosses_parser import UALossesParser
