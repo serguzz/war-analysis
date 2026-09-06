@@ -32,8 +32,12 @@ class Soldier:
     date_of_death: date | None = None
     date_of_burial: date | None = None
     date_of_release_from_captivity: date | None = None
-
     conscription: str | None = None
+
+    posthumous_award_date: date | None = None
+    posthumous_award_url: str | None = None
+
+    cause_of_death: str | None = None
 
     from_location: Location | None = None
     disappeared_in: Location | None = None
@@ -41,6 +45,7 @@ class Soldier:
     buried_in: Location | None = None
 
     rank: str | None = None
+    position: str | None = None
     military_unit: MilitaryUnit | None = None
 
     sources: list[str] | None = None

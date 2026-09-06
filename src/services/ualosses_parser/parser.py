@@ -134,6 +134,10 @@ class UALossesParser:
 
     def _parse_soldier(self, soup: BeautifulSoup) -> Soldier:
         name = self._parse_name(soup)
+        posthumous_award_date, posthumous_award_url = self._parse_posthumous_award_fields(
+            soup,
+            "Posthumous award",
+        )
 
         return Soldier(
             name=name,
@@ -161,6 +165,14 @@ class UALossesParser:
                 soup,
                 "Conscription",
             ),
+            cause_of_death=self._parse_text_field(
+                soup,
+                "Cause of death",
+            ),
+            position=self._parse_text_field(
+                soup,
+                "Position",
+            ),
             from_location=self._parse_location_field(
                 soup,
                 "From",
@@ -181,6 +193,8 @@ class UALossesParser:
                 soup,
                 "Rank",
             ),
+            posthumous_award_date=posthumous_award_date,
+            posthumous_award_url=posthumous_award_url,
             military_unit=self._parse_military_unit_field(
                 soup,
                 "Military Unit",
@@ -340,6 +354,33 @@ class UALossesParser:
                 link["href"],
             ),
         )
+
+    def _parse_posthumous_award_fields(
+        self,
+        soup: BeautifulSoup,
+        field_name: str,
+    ) -> tuple[date | None, str | None]:
+        value = self._find_fact_value(soup, field_name)
+
+        if value is None:
+            return None, None
+
+        link = value.find("a", href=True)
+
+        if link is None:
+            return None, None
+
+        award_date = self._parse_date(link.get_text(" ", strip=True))
+
+        if award_date is None:
+            return None, None
+
+        award_url = urljoin(
+            self.BASE_URL,
+            link["href"],
+        )
+
+        return award_date, award_url
 
     def _parse_sources(
         self,
