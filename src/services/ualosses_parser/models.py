@@ -24,6 +24,12 @@ class Location:
 
 
 @dataclass
+class SoldierListItem:
+    last_name: str
+    url: str
+
+
+@dataclass
 class Soldier:
     name: str
 

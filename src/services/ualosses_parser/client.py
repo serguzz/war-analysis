@@ -26,8 +26,11 @@ class UALossesClient:
         page: int = 1,
         date_from: str | None = None,
         date_to: str | None = None,
+        last_name: str | None = None,
+        sort: str | None = None,
+        direction: str | None = None,
     ) -> str:
-        params = {
+        params: dict[str, str | int] = {
             "page": page,
         }
 
@@ -36,6 +39,15 @@ class UALossesClient:
 
         if date_to is not None:
             params["dod_end"] = date_to
+
+        if last_name is not None:
+            params["last_name"] = last_name
+
+        if sort is not None:
+            params["sort"] = sort
+
+        if direction is not None:
+            params["direction"] = direction
 
         response = self.session.get(
             self.BASE_URL,
