@@ -229,9 +229,9 @@ class UALossesParser:
         """
         html = self.client.get_soldier_page(url)
         soup = BeautifulSoup(html, "html.parser")
-        return self._parse_soldier(soup)
+        return self._parse_soldier(url, soup)
 
-    def _parse_soldier(self, soup: BeautifulSoup) -> Soldier:
+    def _parse_soldier(self, url: str, soup: BeautifulSoup) -> Soldier:
         name = self._parse_name(soup)
         posthumous_award_date, posthumous_award_url = self._parse_posthumous_award_fields(
             soup,
@@ -239,6 +239,7 @@ class UALossesParser:
         )
 
         return Soldier(
+            source_url=url,
             name=name,
             date_of_birth=self._parse_date_field(
                 soup,

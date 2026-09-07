@@ -31,6 +31,7 @@ class SoldierListItem:
 
 @dataclass
 class Soldier:
+    source_url: str
     name: str
 
     date_of_birth: date | None = None
