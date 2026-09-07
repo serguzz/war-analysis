@@ -3,16 +3,12 @@
 
 import uuid
 from uuid import UUID
-
 from datetime import date
 
 from sqlalchemy import ForeignKey, Date, Boolean, Integer, String, Text, Uuid, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.database import Base
-
-
-from src.database.database import Base
+from .database import Base
 
 
 class Place(Base):
