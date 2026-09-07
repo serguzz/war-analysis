@@ -11,13 +11,16 @@ This works for sorting by last names.
 
 from pathlib import Path
 
-from src.services.ualosses_parser import UALossesParser
-from src.services.ualosses_parser import UALossesClient
+from src.services.ualosses_parser import UALossesParser, UALossesClient, UALossesCrawler
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 
 client = UALossesClient()
 parser = UALossesParser()
+crawler = UALossesCrawler(
+    parser,
+    delay_sec=0.5,
+)
 
 page_number = 1000
 
@@ -99,6 +102,29 @@ def demo_listing_by_lastname_page(lastname: str, page: int = 1):
         print(item)    
 
 
+def demo_crawler():
+    prefixes = [
+        "z",
+        # "ni",
+        # "'"
+    ]
+    for prefix in prefixes:
+        print(f"\n{'=' * 60}")
+
+        print(f"PREFIX: {prefix}")
+        count = parser.get_found_count(last_name=prefix)
+        print(f"Found by server: {count}")
+
+        print(f"{'=' * 60}")
+
+        urls = crawler.crawl_prefix(prefix)
+        print(f"Found URLs: {len(urls)}")
+
+        for url in sorted(urls):
+            print(url)
+
+
+
 links = [
     "https://ualosses.org/en/soldier/andryeyev-oleksij-oleksandrovych-1996-06-30-25-novomoskovsk-25th-separate-airborne-brigade-senior-sergeant/",
     "https://ualosses.org/en/soldier/derjahin-roman-jurijovych-1972-06-29-50-rubizhne-92nd-separate-mechanized-brigade-senior-soldier/"
@@ -108,11 +134,14 @@ links = [
 # demo_soldier_page(links)
 
 names = [
-    "ni",
+    "z",
+    # "ni",
     # "f'",
     # "-",
     # "g"
 ]
 
-for name in names:
-    demo_listing_by_lastname_page(name, 67)
+# for name in names:
+#     demo_listing_by_lastname_page(name, 226)
+
+demo_crawler()
