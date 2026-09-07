@@ -18,6 +18,15 @@ import argparse
 from src.services.ualosses_parser import UALossesParser, UALossesCrawler
 
 
+def process_soldiers(urls: list[str]):
+    parser = UALossesParser()
+    for url in urls:
+        soldier = parser.get_soldier(url)
+        print(soldier)
+        # write soldier to DB
+    pass
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Crawl soldier records from UA Losses."
@@ -87,6 +96,11 @@ def main():
         print(url)
 
     print(f"{'=' * 60}")
+    print(f"Getting soldiers and saving to DB ...\n")
+
+    process_soldiers(sorted_urls)
+
+
 
 
 if __name__ == "__main__":
