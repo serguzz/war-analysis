@@ -23,3 +23,9 @@ down:
 
 shell:
 	docker compose run --rm app bash
+
+test:
+	docker compose run --rm app python -m pytest -v
+
+test-crawler:
+	docker compose run --rm app python -m pytest -v tests/services/ualosses/test_crawler.py
