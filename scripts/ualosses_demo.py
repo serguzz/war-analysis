@@ -29,6 +29,13 @@ page_html_dir = (
     / f"page_{page_number}"
 )
 
+page_html_base = (
+    BASE_DIR
+    / "data"
+    / "raw"
+    / "html"
+)
+
 page_soldiers_dir = (
     BASE_DIR
     / "data"
@@ -63,6 +70,11 @@ def demo_soldiers_page(page_number: int):
         with open(soldier_path, "w", encoding="utf-8") as f:
             f.write(str(soldier))  
 
+def demo_soldiers_name_filtering(last_name: str):
+    html = client.get_soldiers_page(last_name=last_name)
+    page_html_path = page_html_base / f"name={last_name}_page_1.html"
+    with open(page_html_path, "w", encoding="utf-8") as f:
+        f.write(html)
 
 def demo_soldier_page(links: list):
     for index, link in enumerate(links):
@@ -74,10 +86,33 @@ def demo_soldier_page(links: list):
         print(soldier)
 
 
+def demo_listing_by_lastname_page(lastname: str, page: int = 1):
+    count = parser.get_found_count(lastname)
+    print(count)
+
+    items = parser.get_soldiers_listing(
+        page=page,
+        last_name=lastname,
+    )
+
+    for item in items[:5]:
+        print(item)    
+
+
 links = [
     "https://ualosses.org/en/soldier/andryeyev-oleksij-oleksandrovych-1996-06-30-25-novomoskovsk-25th-separate-airborne-brigade-senior-sergeant/",
     "https://ualosses.org/en/soldier/derjahin-roman-jurijovych-1972-06-29-50-rubizhne-92nd-separate-mechanized-brigade-senior-soldier/"
     # urls[0],
 ]
 
-demo_soldier_page(links)
+# demo_soldier_page(links)
+
+names = [
+    "ni",
+    # "f'",
+    # "-",
+    # "g"
+]
+
+for name in names:
+    demo_listing_by_lastname_page(name, 67)

@@ -5,7 +5,7 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 
 from .client import UALossesClient
-from .models import Location, Place, Soldier, MilitaryUnit
+from .models import Location, Place, Soldier, MilitaryUnit, SoldierListItem
 
 
 class UALossesParser:
@@ -36,6 +36,27 @@ class UALossesParser:
 
         return self._parse_people_count(soup)
 
+    def get_found_count(
+        self,
+        last_name: str | None = None,
+    ) -> int:
+        """
+        Get the number of people found by the last name filter.
+        Args:
+            last_name: Substring filter for the last name.
+        Returns:
+            Number of people found.
+        """
+        html = self.client.get_soldiers_page(
+            page=1,
+            last_name=last_name,
+            sort="last_name",
+            direction="asc",
+        )
+        soup = BeautifulSoup(html, "html.parser")
+        
+        return self._parse_people_count(soup)
+
 
     @staticmethod
     def _parse_people_count(soup: BeautifulSoup) -> int:
@@ -60,6 +81,33 @@ class UALossesParser:
             )
 
         return int(match.group(1).replace(",", ""))
+
+
+    def get_soldiers_listing(
+        self,
+        page: int,
+        last_name: str | None = None,
+    ) -> list[SoldierListItem]:
+        """
+        Get soldiers from a listing page.
+
+        Args:
+            page: Listing page number.
+            last_name: Substring filter for the last name.
+
+        Returns:
+            List of soldier listing items.
+        """
+        html = self.client.get_soldiers_page(
+            page=page,
+            last_name=last_name,
+            sort="last_name",
+            direction="asc",
+        )
+
+        soup = BeautifulSoup(html, "html.parser")
+
+        return self.parse_soldiers_listing(soup)
 
 
     def get_soldier_urls(
@@ -116,6 +164,117 @@ class UALossesParser:
                 urls.append(url)
 
         return urls
+
+
+    def parse_soldiers_listing(
+        self,
+        soup: BeautifulSoup,
+    ) -> list[SoldierListItem]:
+        """
+        Parse soldier items from a listing page.
+
+        Args:
+            soup: Listing page BeautifulSoup object.
+
+        Returns:
+            List of soldier listing items.
+        """
+        items: list[SoldierListItem] = []
+
+        for link in soup.select('a[href*="/en/soldier/"]'):
+
+            name_element = link.find("b")
+
+            if name_element is None:
+                continue
+
+            full_name = name_element.get_text(
+                " ",
+                strip=True,
+            )
+
+            if not full_name:
+                continue
+
+            href = link.get("href")
+
+            if not href:
+                continue
+
+            last_name = full_name.split()[0]
+
+            items.append(
+                SoldierListItem(
+                    last_name=last_name,
+                    url=urljoin(
+                        self.BASE_URL,
+                        href,
+                    ),
+                )
+            )
+
+        return items
+
+
+    """ 
+    Old version
+
+    def parse_soldiers_listing(
+        self,
+        soup: BeautifulSoup,
+    ) -> list[SoldierListItem]:
+        ""
+        Parse soldier items from a listing page.
+
+        Args:
+            soup: Listing page BeautifulSoup object.
+
+        Returns:
+            List of soldier listing items.
+        ""
+        items: list[SoldierListItem] = []
+
+        for card in soup.select("ul.small-block-grid-2 > li"):
+
+            link = card.select_one(
+                'a[href*="/en/soldier/"]'
+            )
+
+            if link is None:
+                continue
+
+            name_element = link.find("b")
+
+            if name_element is None:
+                continue
+
+            full_name = name_element.get_text(
+                " ",
+                strip=True,
+            )
+
+            if not full_name:
+                continue
+
+            href = link.get("href")
+
+            if not href:
+                continue
+
+            last_name = full_name.split()[0]
+
+            items.append(
+                SoldierListItem(
+                    last_name=last_name,
+                    url=urljoin(
+                        self.BASE_URL,
+                        href,
+                    ),
+                )
+            )
+
+        return items
+    """
 
     def get_soldier(
         self,
