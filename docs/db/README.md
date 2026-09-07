@@ -55,7 +55,7 @@ psycopg[binary]
 The application receives the database connection string through the `DATABASE_URL` environment variable:
 
 ```text
-postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
 ```
 
 Inside Docker Compose, `postgres` is the PostgreSQL service hostname.
@@ -106,3 +106,8 @@ docker compose run --rm app alembic upgrade head
 ```
 
 This creates the initial database schema and the `alembic_version` table used to track applied migrations.
+
+Check if all run well:
+```bash
+docker compose run --rm app alembic check
+```
