@@ -216,66 +216,6 @@ class UALossesParser:
         return items
 
 
-    """ 
-    Old version
-
-    def parse_soldiers_listing(
-        self,
-        soup: BeautifulSoup,
-    ) -> list[SoldierListItem]:
-        ""
-        Parse soldier items from a listing page.
-
-        Args:
-            soup: Listing page BeautifulSoup object.
-
-        Returns:
-            List of soldier listing items.
-        ""
-        items: list[SoldierListItem] = []
-
-        for card in soup.select("ul.small-block-grid-2 > li"):
-
-            link = card.select_one(
-                'a[href*="/en/soldier/"]'
-            )
-
-            if link is None:
-                continue
-
-            name_element = link.find("b")
-
-            if name_element is None:
-                continue
-
-            full_name = name_element.get_text(
-                " ",
-                strip=True,
-            )
-
-            if not full_name:
-                continue
-
-            href = link.get("href")
-
-            if not href:
-                continue
-
-            last_name = full_name.split()[0]
-
-            items.append(
-                SoldierListItem(
-                    last_name=last_name,
-                    url=urljoin(
-                        self.BASE_URL,
-                        href,
-                    ),
-                )
-            )
-
-        return items
-    """
-
     def get_soldier(
         self,
         url: str,
