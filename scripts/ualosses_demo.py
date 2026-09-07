@@ -104,7 +104,7 @@ def demo_listing_by_lastname_page(lastname: str, page: int = 1):
 
 def demo_crawler():
     prefixes = [
-        "z",
+        "ab",
         # "ni",
         # "'"
     ]
@@ -120,7 +120,11 @@ def demo_crawler():
         urls = crawler.crawl_prefix(prefix)
         print(f"Found URLs: {len(urls)}")
 
-        for url in sorted(urls):
+        sorted_urls = sorted(urls)
+
+        for url in sorted_urls[:50]:
+            print(url)
+        for url in sorted_urls[-50:]:
             print(url)
 
 

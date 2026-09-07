@@ -211,9 +211,11 @@ class UALossesCrawler:
         If the prefix contains more than 499 pages,
         recursively subdivide it into child prefixes.
         """
+        logger.info(f"Crawling for prefix: {prefix}")
         found_count = self.parser.get_found_count(
             last_name=prefix,
         )
+        logger.info(f"Found {found_count} records for prefix: {prefix}")
 
         if found_count == 0:
             return set()
@@ -238,7 +240,7 @@ class UALossesCrawler:
         )
 
         if first_page is None:
-            logger.info("First page not found!")
+            logger.info(f"First page not found! No names starting with \"{prefix}\"")
             return set()
 
         logger.info(f"First page is: {first_page}")
@@ -279,24 +281,19 @@ class UALossesCrawler:
                 continue
 
             if any(
-                last_name_starts_with(
-                    record.last_name,
-                    normalized_prefix,
-                )
+                last_name_starts_with(record.last_name,normalized_prefix)
                 for record in records
             ):
                 first_page = mid
                 hi = mid - 1
                 continue
 
-            last_name = normalize_last_name(
-                records[-1].last_name
-            )
+            last_name = normalize_last_name(records[-1].last_name)
 
             if last_name < normalized_prefix:
                 lo = mid + 1
             else:
-                lo = mid + 1
+                hi = mid - 1
 
         return first_page
 
