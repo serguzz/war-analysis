@@ -1,3 +1,18 @@
+"""
+    Run for prefix crawl:
+    ```bash
+    docker compose run --rm app \
+    python scripts/ualosses_crawl.py --prefixes "ni,f',z,-"
+    ```
+
+    Full crawl:
+    ```bash
+    docker compose run --rm app \
+    python scripts/ualosses_crawl.py --all
+    ```
+
+"""
+
 import argparse
 
 from src.services.ualosses_parser import UALossesParser, UALossesCrawler
@@ -62,6 +77,15 @@ def main():
 
     print(f"\n{'=' * 60}")
     print(f"TOTAL UNIQUE URLs: {len(urls)}")
+    print(f"{'=' * 60}")
+
+    sorted_urls = sorted(urls)
+
+    for url in sorted_urls[:50]:
+        print(url)
+    for url in sorted_urls[-50:]:
+        print(url)
+
     print(f"{'=' * 60}")
 
 

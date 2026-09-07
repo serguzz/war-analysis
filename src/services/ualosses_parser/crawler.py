@@ -172,6 +172,10 @@ class UALossesCrawler:
 
 
     def root_crawl(self):
+        """
+        Returns:
+            All unique urls of soldier pages.
+        """
         all_urls = set()
         for symbol in ALPHABET:
             urls = set()
