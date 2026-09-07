@@ -44,3 +44,84 @@ Deduplicate soldier URLs across all prefixes.
 
 
 """
+
+from math import ceil
+from time import sleep
+
+
+LETTERS = "abcdefghijklmnopqrstuvwxyz"
+SYMBOLS = "'-"
+ALPHABET = LETTERS + SYMBOLS
+
+SOLDIERS_PER_PAGE = 100
+MAX_PAGE = 499
+
+def normalize_last_name(name: str) -> str:
+    return name.lower()
+
+
+def last_name_starts_with(
+    name: str,
+    prefix: str,
+) -> bool:
+    return normalize_last_name(name).startswith(
+        normalize_last_name(prefix)
+    )
+
+
+def next_prefix(prefix: str) -> str:
+    """
+    Return the lexicographic upper bound for names
+    starting with the given prefix.
+    """
+    prefix = normalize_last_name(prefix)
+
+    if not prefix:
+        return ""
+
+    chars = list(prefix)
+
+    for i in range(len(chars) - 1, -1, -1):
+        char = chars[i]
+
+        if char in ALPHABET:
+            index = ALPHABET.index(char)
+
+            if index < len(ALPHABET) - 1:
+                chars[i] = ALPHABET[index + 1]
+                return "".join(chars)
+
+            chars[i] = ALPHABET[0]
+            continue
+
+        # Character outside our alphabet.
+        # Fall back to a value immediately after the prefix.
+        return prefix + ALPHABET[0]
+
+    return prefix + ALPHABET[0]
+
+
+def estimate_max_page(found_count: int) -> int:
+    """
+    Estimate the last listing page for the given result count.
+
+    The website exposes at most 499 listing pages.
+    """
+    return min(MAX_PAGE, ceil(found_count / SOLDIERS_PER_PAGE))
+
+
+def needs_subdivide(found_count: int) -> bool:
+    """
+    Return True when a prefix contains more records
+    than can be reached within the 499-page limit.
+    """
+    return ceil(found_count / SOLDIERS_PER_PAGE) > MAX_PAGE
+
+
+def expand_prefix(parent: str) -> list[str]:
+    """
+    Expand a prefix by one symbol.
+    """
+    return [parent + symbol for symbol in ALPHABET]
+
+
