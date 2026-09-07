@@ -19,7 +19,7 @@ client = UALossesClient()
 parser = UALossesParser()
 crawler = UALossesCrawler(
     parser,
-    delay_sec=0.5,
+    delay_sec=0.2,
 )
 
 page_number = 1000

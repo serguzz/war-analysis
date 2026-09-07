@@ -44,14 +44,21 @@ Deduplicate soldier URLs across all prefixes.
 
 
 """
+import logging
 
 from math import ceil
 from time import sleep
 
+logging.basicConfig(
+    level=logging.INFO, 
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+logger = logging.getLogger(__name__)
 
 LETTERS = "abcdefghijklmnopqrstuvwxyz"
 SYMBOLS = "'-"
-ALPHABET = LETTERS + SYMBOLS
+ALPHABET = SYMBOLS + LETTERS
 
 SOLDIERS_PER_PAGE = 100
 MAX_PAGE = 499
@@ -71,9 +78,41 @@ def last_name_starts_with(
 
 def next_prefix(prefix: str) -> str:
     """
+    Return the next lexicographic prefix.
+
+    Returns an empty string when no upper bound exists.
+    """
+    prefix = normalize_last_name(prefix)
+
+    if not prefix:
+        return ""
+
+    chars = list(prefix)
+
+    for i in range(len(chars) - 1, -1, -1):
+        char = chars[i]
+
+        if char not in ALPHABET:
+            return ""
+
+        index = ALPHABET.index(char)
+
+        if index < len(ALPHABET) - 1:
+            chars[i] = ALPHABET[index + 1]
+
+            return "".join(chars[: i + 1])
+
+    return ""
+
+
+    """
+    Old version
+
+def next_prefix(prefix: str) -> str:
+    ""
     Return the lexicographic upper bound for names
     starting with the given prefix.
-    """
+    ""
     prefix = normalize_last_name(prefix)
 
     if not prefix:
@@ -99,7 +138,7 @@ def next_prefix(prefix: str) -> str:
         return prefix + ALPHABET[0]
 
     return prefix + ALPHABET[0]
-
+    """
 
 def estimate_max_page(found_count: int) -> int:
     """
@@ -180,6 +219,7 @@ class UALossesCrawler:
             return set()
 
         if needs_subdivide(found_count):
+            logger.info(f"Needs subdivide, because too many found: {found_count}")
             urls: set[str] = set()
 
             for child_prefix in expand_prefix(prefix):
@@ -190,6 +230,7 @@ class UALossesCrawler:
             return urls
 
         max_page = estimate_max_page(found_count)
+        logger.info(f"Max page estimated to: {max_page}")
 
         first_page = self._find_first_page(
             prefix,
@@ -197,7 +238,10 @@ class UALossesCrawler:
         )
 
         if first_page is None:
+            logger.info("First page not found!")
             return set()
+
+        logger.info(f"First page is: {first_page}")
 
         return self._collect_pages(
             prefix,
@@ -270,6 +314,7 @@ class UALossesCrawler:
 
         normalized_prefix = normalize_last_name(prefix)
         upper_bound = next_prefix(prefix)
+        logger.info(f"Next prefix is: {upper_bound}")
 
         for page in range(first_page, max_page + 1):
             records = self.parser.get_soldiers_listing(
