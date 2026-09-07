@@ -170,6 +170,37 @@ class UALossesCrawler:
             max_page,
         )
 
+
+    def root_crawl(self):
+        all_urls = set()
+        for symbol in ALPHABET:
+            urls = set()
+
+            print(f"\n{'=' * 60}")
+
+            print(f"PREFIX: {symbol}")
+            count = self.parser.get_found_count(last_name=symbol)
+            print(f"Found by server: {count}")
+
+            print(f"{'=' * 60}")
+            if count == 0:
+                continue
+
+            urls = self.crawl_prefix(symbol)
+            print(f"Found URLs: {len(urls)}")
+            
+            all_urls.update(urls)
+
+            sorted_urls = sorted(urls)
+
+            for url in sorted_urls[:50]:
+                print(url)
+            for url in sorted_urls[-50:]:
+                print(url)
+
+        return sorted(all_urls)
+
+
     def _find_first_page(
         self,
         prefix: str,

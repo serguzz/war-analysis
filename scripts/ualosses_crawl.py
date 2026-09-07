@@ -1,59 +1,69 @@
-from pathlib import Path
+import argparse
 
-from src.services.ualosses_parser import UALossesParser, UALossesClient, UALossesCrawler
-
-BASE_DIR = Path(__file__).resolve().parents[1]
-
-client = UALossesClient()
-parser = UALossesParser()
-crawler = UALossesCrawler(
-    parser,
-    delay_sec=0.2,
-)
-
-page_html_base = (
-    BASE_DIR
-    / "data"
-    / "raw"
-    / "html"
-)
+from src.services.ualosses_parser import UALossesParser, UALossesCrawler
 
 
-def demo_crawler():
-    prefixes = [
-        "ab",
-        # "ni",
-        # "'"
-    ]
-    for prefix in prefixes:
-        print(f"\n{'=' * 60}")
+def main():
+    parser = argparse.ArgumentParser(
+        description="Crawl soldier records from UA Losses."
+    )
 
-        print(f"PREFIX: {prefix}")
-        count = parser.get_found_count(last_name=prefix)
-        print(f"Found by server: {count}")
+    group = parser.add_mutually_exclusive_group(required=True)
 
-        print(f"{'=' * 60}")
+    group.add_argument(
+        "--prefixes",
+        type=str,
+        help="Comma-separated prefixes to crawl, e.g. ni,f',z,-",
+    )
 
-        urls = crawler.crawl_prefix(prefix)
-        print(f"Found URLs: {len(urls)}")
+    group.add_argument(
+        "--all",
+        action="store_true",
+        help="Run full adaptive crawl.",
+    )
 
-        sorted_urls = sorted(urls)
+    args = parser.parse_args()
 
-        for url in sorted_urls[:50]:
-            print(url)
-        for url in sorted_urls[-50:]:
-            print(url)
+    parser_service = UALossesParser()
+
+    crawler = UALossesCrawler(
+        parser_service,
+        delay_sec=0.2,
+    )
+
+    if args.all:
+        urls = crawler.root_crawl()
+
+    else:
+        prefixes = [
+            prefix.strip()
+            for prefix in args.prefixes.split(",")
+            if prefix.strip()
+        ]
+
+        urls = set()
+
+        for prefix in prefixes:
+            print(f"\n{'=' * 60}")
+            print(f"PREFIX: {prefix}")
+
+            count = parser_service.get_found_count(
+                last_name=prefix,
+            )
+
+            print(f"Found by server: {count}")
+            print(f"{'=' * 60}")
+
+            prefix_urls = crawler.crawl_prefix(prefix)
+
+            print(f"Found URLs: {len(prefix_urls)}")
+
+            urls.update(prefix_urls)
+
+    print(f"\n{'=' * 60}")
+    print(f"TOTAL UNIQUE URLs: {len(urls)}")
+    print(f"{'=' * 60}")
 
 
-names = [
-    "z",
-    # "ni",
-    # "f'",
-    # "-",
-    # "g"
-]
-
-# for name in names:
-#     demo_listing_by_lastname_page(name, 226)
-
-demo_crawler()
+if __name__ == "__main__":
+    main()
