@@ -6,12 +6,12 @@ import pandas as pd
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 
-ODS_PATH = BASE_DIR / "data" / "raw" / "sad.ods"
+ODS_PATH = BASE_DIR / "data" / "raw" / "sad_sheptytskiy_fb.ods"
 
 
 # Analysis period
 DATE_START = "2022-01-01"
-DATE_END = "2026-08-31"
+DATE_END = "2026-09-09"
 
 
 def main() -> None:

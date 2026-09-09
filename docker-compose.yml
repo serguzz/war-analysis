@@ -1,7 +1,7 @@
 services:
   app:
     user: "${UID}:${GID}"
-      
+
     build:
       context: .
       dockerfile: Dockerfile
@@ -11,7 +11,9 @@ services:
     working_dir: /app
 
     environment:
-      PYTHONPATH: /app  
+      PYTHONPATH: /app
+      HOME: /tmp
+      MPLCONFIGDIR: /tmp/matplotlib
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
 
     volumes:
@@ -29,6 +31,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    # ports:
+      # - "${POSTGRES_PORT}:5432"
 
     volumes:
       - ./data/db/postgres:/var/lib/postgresql/data
