@@ -2,6 +2,12 @@
 
 from dataclasses import dataclass
 from datetime import date
+from enum import StrEnum
+
+class DatePrecision(StrEnum):
+    DAY = "day"
+    MONTH = "month"
+    YEAR = "year"
 
 
 @dataclass
@@ -35,13 +41,20 @@ class Soldier:
     name: str
 
     date_of_birth: date | None = None
+    date_of_birth_precision: DatePrecision | None = None
     date_of_disappearance: date | None = None
+    date_of_disappearance_precision: DatePrecision | None = None
     date_of_death: date | None = None
+    date_of_death_precision: DatePrecision | None = None
     date_of_burial: date | None = None
+    date_of_burial_precision: DatePrecision | None = None
     date_of_release_from_captivity: date | None = None
+    date_of_release_from_captivity_precision: DatePrecision | None = None
+
     conscription: str | None = None
 
     posthumous_award_date: date | None = None
+    posthumous_award_date_precision: DatePrecision | None = None
     posthumous_award_url: str | None = None
 
     cause_of_death: str | None = None

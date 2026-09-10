@@ -8,12 +8,20 @@ from datetime import date, datetime
 from sqlalchemy import (
     ForeignKey, Date, Boolean, String, Text, Uuid,
     UniqueConstraint, 
-    DateTime, func
+    DateTime, func,
+    Enum,
     )
 from sqlalchemy.orm import Mapped, mapped_column
 
+from src.services.ualosses_parser.models import DatePrecision
+
 from .database import Base
 
+
+DATE_PRECISION_ENUM = Enum(
+    DatePrecision,
+    name="date_precision",
+)
 
 class Place(Base):
     __tablename__ = "places"
@@ -273,8 +281,18 @@ class Soldier(Base):
         nullable=True,
     )
 
+    date_of_birth_precision: Mapped[DatePrecision | None] = mapped_column(
+        DATE_PRECISION_ENUM,
+        nullable=True,
+    )
+
     date_of_disappearance: Mapped[date | None] = mapped_column(
         Date,
+        nullable=True,
+    )
+
+    date_of_disappearance_precision: Mapped[DatePrecision | None] = mapped_column(
+        DATE_PRECISION_ENUM,
         nullable=True,
     )
 
@@ -283,13 +301,28 @@ class Soldier(Base):
         nullable=True,
     )
 
+    date_of_death_precision: Mapped[DatePrecision | None] = mapped_column(
+        DATE_PRECISION_ENUM,
+        nullable=True,
+    )
+
     date_of_burial: Mapped[date | None] = mapped_column(
         Date,
         nullable=True,
     )
 
+    date_of_burial_precision: Mapped[DatePrecision | None] = mapped_column(
+        DATE_PRECISION_ENUM,
+        nullable=True,
+    )
+
     date_of_release_from_captivity: Mapped[date | None] = mapped_column(
         Date,
+        nullable=True,
+    )
+
+    date_of_release_from_captivity_precision: Mapped[DatePrecision | None] = mapped_column(
+        DATE_PRECISION_ENUM,
         nullable=True,
     )
 
@@ -300,6 +333,11 @@ class Soldier(Base):
 
     posthumous_award_date: Mapped[date | None] = mapped_column(
         Date,
+        nullable=True,
+    )
+
+    posthumous_award_date_precision: Mapped[DatePrecision | None] = mapped_column(
+        DATE_PRECISION_ENUM,
         nullable=True,
     )
 
