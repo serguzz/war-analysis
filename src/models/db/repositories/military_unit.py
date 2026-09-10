@@ -1,9 +1,13 @@
 from sqlalchemy import select, update, delete
+from sqlalchemy.orm import Session
 
 from .base import BaseRepository
 from src.models.db.models import MilitaryUnit
 
 class MilitaryUnitRepository(BaseRepository[MilitaryUnit]):
+
+    def __init__(self, session: Session):
+        super().__init__(MilitaryUnit, session)
 
     def get_by_name_and_url(
         self,

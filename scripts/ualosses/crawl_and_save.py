@@ -1,11 +1,12 @@
+import sys
+
 from src.models.db.database import SessionLocal
 from src.services.ualosses.service import UALossesService
 from src.services.ualosses_parser.crawler import UALossesCrawler
 from src.services.ualosses_parser.parser import UALossesParser
 
-
 BATCH_SIZE = 100
-
+LIMIT = int(sys.argv[1]) if len(sys.argv) > 1 else 1
 
 def main():
     crawler = UALossesCrawler(...)
@@ -19,7 +20,9 @@ def main():
         errors = 0
 
         for url in crawler.crawl():
-            processed += 1
+
+            if processed >= LIMIT:
+                break
 
             try:
                 with session.begin_nested():
@@ -41,6 +44,9 @@ def main():
                     f"{url}: "
                     f"{type(exc).__name__}: {exc}"
                 )
+
+            finally:
+                processed += 1
 
             if processed % BATCH_SIZE == 0:
                 try:
