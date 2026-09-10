@@ -1,5 +1,6 @@
 # src/models/db/repositories/base.py
 from typing import Generic, Type, TypeVar, Optional, Sequence
+from uuid import UUID
 from sqlalchemy import select, update, delete
 from sqlalchemy.orm import Session
 
@@ -11,7 +12,7 @@ class BaseRepository(Generic[ModelType]):
         self.model = model
         self.session = session
 
-    def get(self, id: int) -> Optional[ModelType]:
+    def get(self, id: UUID) -> Optional[ModelType]:
         """Отримати один запис за ID."""
         return self.session.get(self.model, id)
 
@@ -27,19 +28,23 @@ class BaseRepository(Generic[ModelType]):
         self.session.add(db_obj)
         return db_obj
 
-    def update(self, id: int, data: dict) -> Optional[ModelType]:
+    def update(self, id: UUID, data: dict) -> Optional[ModelType]:
         """Оновити запис за ID (SQLAlchemy 2.0 стиль)."""
-        statement = (
-            update(self.model)
-            .where(self.model.id == id)
-            .values(**data)
-            .returning(self.model)
-        )
-        result = self.session.execute(statement)
-        return result.scalar_one_or_none()
+        db_obj = self.session.get(self.model, id)
+        if db_obj is None:
+            return None
+        
+        for field, value in data.items():
+            setattr(db_obj, field, value)
 
-    def delete(self, id: int) -> bool:
+        return db_obj
+
+    def delete(self, id: UUID) -> bool:
         """Видалити запис за ID."""
-        statement = delete(self.model).where(self.model.id == id)
-        result = self.session.execute(statement)
-        return result.rowcount > 0
+        db_obj = self.session.get(self.model, id)
+
+        if db_obj is None:
+            return False
+
+        self.session.delete(db_obj)
+        return True
