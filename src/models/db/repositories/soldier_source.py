@@ -27,3 +27,20 @@ class SoldierSourceRepository(BaseRepository[SoldierSource]):
         )
 
         return self.session.execute(statement).scalar_one_or_none()
+
+    # gets all sources for a soldier
+    def get_by_soldier(
+        self,
+        soldier_id: UUID,
+    ) -> list[SoldierSource]:
+        statement = (
+            select(SoldierSource)
+            .where(
+                SoldierSource.soldier_id == soldier_id
+            )
+        )
+        return list(
+            self.session.execute(statement)
+            .scalars()
+            .all()
+        )
