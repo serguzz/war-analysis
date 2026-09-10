@@ -90,10 +90,10 @@ def main():
 
     sorted_urls = sorted(urls)
 
-    for url in sorted_urls[:50]:
+    """for url in sorted_urls[:50]:
         print(url)
     for url in sorted_urls[-50:]:
-        print(url)
+        print(url)"""
 
     print(f"{'=' * 60}")
     print(f"Getting soldiers and saving to DB ...\n")

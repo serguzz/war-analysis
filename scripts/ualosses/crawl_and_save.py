@@ -21,8 +21,8 @@ def main():
         updated = 0
         errors = 0
 
-        # urls = crawler.root_crawl()
-        urls = crawler.crawl_prefix("abab")
+        urls = crawler.root_crawl(LIMIT)
+        # urls = crawler.crawl_prefix("aba", LIMIT)
 
         for url in urls:
 

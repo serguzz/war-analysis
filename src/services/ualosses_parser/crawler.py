@@ -209,10 +209,10 @@ class UALossesCrawler:
 
         sorted_urls = sorted(all_urls)
 
-        for url in sorted_urls[:50]:
+        """for url in sorted_urls[:50]:
             print(url)
         for url in sorted_urls[-50:]:
-            print(url)
+            print(url)"""
 
         return sorted_urls
 
