@@ -58,8 +58,6 @@ class UALossesService:
             "url": place.url,
         })
 
-        self.session.flush()
-
         return db_place
 
 
@@ -82,8 +80,6 @@ class UALossesService:
             "name": unit.name,
             "url": unit.url,
         })
-
-        self.session.flush()
 
         return db_unit
 
@@ -108,6 +104,8 @@ class UALossesService:
             location.oblast
         )
 
+        self.session.flush()
+
         db_location = self.location_repo.get_by_places(
             settlement_id=settlement.id if settlement else None,
             community_id=community.id if community else None,
@@ -125,8 +123,6 @@ class UALossesService:
             "oblast_id": oblast.id if oblast else None,
         })
 
-        self.session.flush()
-
         return db_location
 
 
@@ -143,8 +139,6 @@ class UALossesService:
             "url": url,
         })
 
-        self.session.flush()
-
         return db_source
 
 
@@ -157,25 +151,22 @@ class UALossesService:
         primary_urls = soldier.sources or []
         additional_urls = soldier.additional_sources or []
 
-        sources = [
-            (url, True)
-            for url in primary_urls
-        ]
+        sources: dict[str, bool] = {}
 
-        sources.extend(
-            (url, False)
-            for url in additional_urls
-        )
+        for url in primary_urls:
+            if url:
+                sources[url] = True
 
-        seen_urls = set()
+        for url in additional_urls:
+            if url and url not in sources:
+                sources[url] = False
 
-        for url, is_primary in sources:
-            if not url or url in seen_urls:
-                continue
+        current_source_ids = set()
 
-            seen_urls.add(url)
-
+        for url, is_primary in sources.items():
             db_source = self._get_or_create_source(url)
+
+            current_source_ids.add(db_source.id)
 
             existing = (
                 self.soldier_source_repo
@@ -191,6 +182,22 @@ class UALossesService:
                     "source_id": db_source.id,
                     "is_primary_source": is_primary,
                 })
+            else:
+                self.soldier_source_repo.update(
+                    existing.id,
+                    {
+                        "is_primary_source": is_primary,
+                    },
+                )
+
+        existing_links = (
+            self.soldier_source_repo
+            .get_by_soldier(db_soldier.id)
+        )
+
+        for link in existing_links:
+            if link.source_id not in current_source_ids:
+                self.soldier_source_repo.delete(link.id)
 
 
     def save_soldier(self, soldier: Soldier) -> DBSoldier:
@@ -256,7 +263,7 @@ class UALossesService:
             db_soldier = self.soldier_repo.create(data)
 
         else:
-            self.soldier_repo.update(
+            db_soldier = self.soldier_repo.update(
                 db_soldier.id,
                 data,
             )
