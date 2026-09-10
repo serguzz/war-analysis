@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 
 from src.models.db.database import SessionLocal
 from src.services.ualosses.service import UALossesService
@@ -7,6 +8,16 @@ from src.services.ualosses_parser.parser import UALossesParser
 
 BATCH_SIZE = 100
 LIMIT = int(sys.argv[1]) if len(sys.argv) > 1 else 1
+
+FAILED_URLS_FILE = Path("data/logs/failed_urls.log")
+FAILED_URLS_FILE.parent.mkdir(
+    parents=True,
+    exist_ok=True,
+)
+
+def log_failed_url(url: str) -> None:
+    with FAILED_URLS_FILE.open("a", encoding="utf-8") as file:
+        file.write(f"{url}\n")
 
 def main():
     parser = UALossesParser()
@@ -21,10 +32,17 @@ def main():
         updated = 0
         errors = 0
 
-        urls = crawler.root_crawl(LIMIT)
-        # urls = crawler.crawl_prefix("aba", LIMIT)
+        #urls = crawler.root_crawl(LIMIT)
+        # urls = crawler.crawl_prefix("a", LIMIT)
+        
+        urls = set()
+        # for symbol in "lmnopqrstuvwxyz":
+        for symbol in "l":
+            prefix = 'a' + symbol
+            symbol_urls = crawler.crawl_prefix(prefix)
+            urls.update(symbol_urls)
 
-        for url in urls:
+        for url in sorted(urls):
 
             if processed >= LIMIT:
                 break
@@ -52,6 +70,7 @@ def main():
                     f"{url}: "
                     f"{type(exc).__name__}: {exc}"
                 )
+                log_failed_url(url)
 
             finally:
                 processed += 1
@@ -62,7 +81,7 @@ def main():
 
                     print(
                         f"[BATCH] committed {processed} soldiers "
-                        f"(saved={saved}, errors={errors})"
+                        f"(created={created}, updated={updated}, saved={created + updated}, errors={errors})"
                     )
 
                 except Exception as exc:
