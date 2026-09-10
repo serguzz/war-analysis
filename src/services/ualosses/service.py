@@ -25,6 +25,21 @@ from src.models.db.repositories import (
     SoldierRepository
 )
 
+from dataclasses import dataclass
+from typing import Generic, TypeVar
+
+T = TypeVar("T")
+
+@dataclass
+class SaveResult(Generic[T]):
+    entity: T
+    created: bool
+
+    @property
+    def updated(self) -> bool:
+        return not self.created
+
+
 class UALossesService:
 
     def __init__(self, session: Session):
@@ -58,6 +73,7 @@ class UALossesService:
             "url": place.url,
         })
 
+        self.session.flush()
         return db_place
 
 
@@ -81,6 +97,7 @@ class UALossesService:
             "url": unit.url,
         })
 
+        self.session.flush()
         return db_unit
 
 
@@ -139,6 +156,7 @@ class UALossesService:
             "url": url,
         })
 
+        self.session.flush()
         return db_source
 
 
@@ -200,10 +218,11 @@ class UALossesService:
                 self.soldier_source_repo.delete(link.id)
 
 
-    def save_soldier(self, soldier: Soldier) -> DBSoldier:
+    def save_soldier(self, soldier: Soldier) -> SaveResult[DBSoldier]:
         db_soldier = self.soldier_repo.get_by_source_url(
             soldier.source_url
         )
+        is_new = db_soldier is None
 
         military_unit = self._get_or_create_military_unit(
             soldier.military_unit
@@ -275,6 +294,6 @@ class UALossesService:
             soldier,
         )
 
-        return db_soldier
+        return SaveResult(entity=db_soldier, created=is_new)
 
 

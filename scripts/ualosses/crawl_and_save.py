@@ -9,32 +9,40 @@ BATCH_SIZE = 100
 LIMIT = int(sys.argv[1]) if len(sys.argv) > 1 else 1
 
 def main():
-    crawler = UALossesCrawler(...)
-    parser = UALossesParser(...)
+    parser = UALossesParser()
+    crawler = UALossesCrawler(parser)
 
     with SessionLocal() as session:
         service = UALossesService(session)
 
         processed = 0
         saved = 0
+        created = 0
+        updated = 0
         errors = 0
 
-        for url in crawler.crawl():
+        # urls = crawler.root_crawl()
+        urls = crawler.crawl_prefix("abab")
+
+        for url in urls:
 
             if processed >= LIMIT:
                 break
 
             try:
                 with session.begin_nested():
-                    parsed_soldier = parser.parse_soldier(url)
-                    service.save_soldier(parsed_soldier)
+                    parsed_soldier = parser.get_soldier(url)
+                    result = service.save_soldier(parsed_soldier)
 
-                saved += 1
+                if result.created:
+                    created += 1
+                else:
+                    updated += 1
 
-                print(
+                """print(
                     f"[OK] {processed} "
                     f"{url}"
-                )
+                )"""
 
             except Exception as exc:
                 errors += 1
@@ -75,7 +83,9 @@ def main():
                 print(
                     f"[BATCH] committed final batch "
                     f"(processed={processed}, "
-                    f"saved={saved}, "
+                    f"created={created}, "
+                    f"updated={updated}, "
+                    f"saved={created + updated}, "
                     f"errors={errors})"
                 )
 
@@ -90,7 +100,7 @@ def main():
         print(
             f"[DONE] "
             f"processed={processed}, "
-            f"saved={saved}, "
+            f"saved={created + updated}, "
             f"errors={errors}"
         )
 

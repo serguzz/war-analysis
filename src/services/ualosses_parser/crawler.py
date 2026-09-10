@@ -123,6 +123,7 @@ class UALossesCrawler:
     def crawl_prefix(
         self,
         prefix: str,
+        remaining_limit: int | None = None,
     ) -> set[str]:
         """
         Crawl one last-name prefix.
@@ -131,9 +132,11 @@ class UALossesCrawler:
         recursively subdivide it into child prefixes.
         """
         logger.info(f"Crawling for prefix: {prefix}")
-        found_count = self.parser.get_found_count(
-            last_name=prefix,
-        )
+
+        if remaining_limit is not None and remaining_limit <= 0:
+            return set()
+
+        found_count = self.parser.get_found_count(last_name=prefix)
         logger.info(f"Found {found_count} records for prefix: {prefix}")
 
         if found_count == 0:
@@ -144,8 +147,13 @@ class UALossesCrawler:
             urls: set[str] = set()
 
             for child_prefix in expand_prefix(prefix):
+                if remaining_limit is not None and len(urls) >= remaining_limit:
+                    break
+                child_remaining_limit = (
+                    None if remaining_limit is None else remaining_limit - len(urls)
+                )
                 urls.update(
-                    self.crawl_prefix(child_prefix)
+                    self.crawl_prefix(child_prefix, child_remaining_limit)
                 )
 
             return urls
@@ -168,17 +176,19 @@ class UALossesCrawler:
             prefix,
             first_page,
             max_page,
+            remaining_limit
         )
 
 
-    def root_crawl(self):
+    def root_crawl(self, limit: int | None):
         """
         Returns:
             All unique urls of soldier pages.
         """
         all_urls = set()
         for symbol in ALPHABET:
-            urls = set()
+            if limit is not None and len(all_urls) >= limit:
+                break
 
             print(f"\n{'=' * 60}")
 
@@ -190,19 +200,21 @@ class UALossesCrawler:
             if count == 0:
                 continue
 
-            urls = self.crawl_prefix(symbol)
+            remaining_limit = None if limit is None else limit - len(all_urls)
+            urls = self.crawl_prefix(symbol, remaining_limit)
             print(f"Found URLs: {len(urls)}")
             
             all_urls.update(urls)
 
-            sorted_urls = sorted(urls)
 
-            for url in sorted_urls[:50]:
-                print(url)
-            for url in sorted_urls[-50:]:
-                print(url)
+        sorted_urls = sorted(all_urls)
 
-        return sorted(all_urls)
+        for url in sorted_urls[:50]:
+            print(url)
+        for url in sorted_urls[-50:]:
+            print(url)
+
+        return sorted_urls
 
 
     def _find_first_page(
@@ -256,6 +268,7 @@ class UALossesCrawler:
         prefix: str,
         first_page: int,
         max_page: int,
+        remaining_limit: int | None = None
     ) -> set[str]:
         """
         Sequentially collect soldier URLs belonging
@@ -268,6 +281,15 @@ class UALossesCrawler:
         logger.info(f"Next prefix is: {upper_bound}")
 
         for page in range(first_page, max_page + 1):
+            if (
+                remaining_limit is not None
+                and len(urls) >= remaining_limit
+            ):
+                logger.info(
+                    f"Reached remaining limit ({remaining_limit}), "
+                    f"stopping at page {page}"
+                )
+                break
             records = self.parser.get_soldiers_listing(
                 page=page,
                 last_name=prefix,
@@ -296,6 +318,7 @@ class UALossesCrawler:
                     urls.add(record.url)
 
         return urls
+
 
     def _delay(self) -> None:
         if self.delay_sec > 0:
