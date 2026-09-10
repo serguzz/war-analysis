@@ -29,6 +29,7 @@ def upgrade() -> None:
     sa.UniqueConstraint('name', 'url', name='uq_military_units_name_url', postgresql_nulls_not_distinct=True)
     )
     op.create_index(op.f('ix_military_units_url'), 'military_units', ['url'], unique=False)
+
     op.create_table('places',
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
@@ -36,12 +37,14 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name', 'url', name='uq_places_name_url', postgresql_nulls_not_distinct=True)
     )
+
     op.create_table('sources',
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('url', sa.String(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_sources_url'), 'sources', ['url'], unique=True)
+
     op.create_table('locations',
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('settlement_id', sa.Uuid(), nullable=True),
@@ -59,6 +62,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_locations_district_id'), 'locations', ['district_id'], unique=False)
     op.create_index(op.f('ix_locations_oblast_id'), 'locations', ['oblast_id'], unique=False)
     op.create_index(op.f('ix_locations_settlement_id'), 'locations', ['settlement_id'], unique=False)
+
     op.create_table('soldiers',
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
@@ -90,6 +94,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_soldiers_disappeared_in_id'), 'soldiers', ['disappeared_in_id'], unique=False)
     op.create_index(op.f('ix_soldiers_from_location_id'), 'soldiers', ['from_location_id'], unique=False)
     op.create_index(op.f('ix_soldiers_military_unit_id'), 'soldiers', ['military_unit_id'], unique=False)
+
     op.create_table('soldier_sources',
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('soldier_id', sa.Uuid(), nullable=False),

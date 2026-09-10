@@ -3,9 +3,13 @@
 
 import uuid
 from uuid import UUID
-from datetime import date
+from datetime import date, datetime
 
-from sqlalchemy import ForeignKey, Date, Boolean, Integer, String, Text, Uuid, UniqueConstraint
+from sqlalchemy import (
+    ForeignKey, Date, Boolean, String, Text, Uuid,
+    UniqueConstraint, 
+    DateTime, func
+    )
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .database import Base
@@ -37,6 +41,19 @@ class Place(Base):
     url: Mapped[str | None] = mapped_column(
         String,
         nullable=True,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
 
@@ -89,6 +106,19 @@ class Location(Base):
         index=True,
     )
 
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
 
 class MilitaryUnit(Base):
     __tablename__ = "military_units"
@@ -119,6 +149,19 @@ class MilitaryUnit(Base):
         index=True,
     )
 
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
 
 # Sources (url links) to publication, information, etc.
 class Source(Base):
@@ -135,6 +178,19 @@ class Source(Base):
         nullable=False,
         unique=True,
         index=True,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
 
@@ -175,6 +231,19 @@ class SoldierSource(Base):
         Boolean,
         nullable=False,
         default=False,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
 
@@ -280,4 +349,17 @@ class Soldier(Base):
         ForeignKey("military_units.id"),
         nullable=True,
         index=True,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
