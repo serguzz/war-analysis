@@ -261,6 +261,13 @@ class Soldier(Base):
         nullable=False,
     )
 
+    source_url: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+
     date_of_birth: Mapped[date | None] = mapped_column(
         Date,
         nullable=True,
