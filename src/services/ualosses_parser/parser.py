@@ -495,17 +495,14 @@ class UALossesParser:
         value = self._find_fact_value(soup, field_name)
 
         if value is None:
-            return None, None
+            return None, None, None
 
         link = value.find("a", href=True)
-
-        if link is None:
-            return None, None
 
         award_date, award_date_precision = self._parse_date(link.get_text(" ", strip=True))
 
         if award_date is None:
-            return None, None
+            return None, None, link
 
         award_url = urljoin(
             self.BASE_URL,

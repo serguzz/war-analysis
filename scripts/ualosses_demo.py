@@ -133,7 +133,7 @@ links = [
     # "https://ualosses.org/en/soldier/andryeyev-oleksij-oleksandrovych-1996-06-30-25-novomoskovsk-25th-separate-airborne-brigade-senior-sergeant/",
     # "https://ualosses.org/en/soldier/derjahin-roman-jurijovych-1972-06-29-50-rubizhne-92nd-separate-mechanized-brigade-senior-soldier/"
     # urls[0],
-    "https://ualosses.org/en/soldier/akritov-roman-volodymyrovych-1973-02-02-zaporizhzhja-9th-operation-regiment-soldier/",
+    "https://ualosses.org/en/soldier/alyeksyeyev-oleksij-ivanovych-1977-03-22-48-nova-zburyivka-1st-separate-brigade-of-the-state-special-transport-service-junior-sergeant/",
 ]
 
 demo_soldier_page(links)
