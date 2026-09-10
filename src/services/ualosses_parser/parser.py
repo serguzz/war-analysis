@@ -5,7 +5,7 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 
 from .client import UALossesClient
-from .models import Location, Place, Soldier, MilitaryUnit, SoldierListItem
+from .models import DatePrecision, Location, Place, Soldier, MilitaryUnit, SoldierListItem
 
 
 class UALossesParser:
@@ -233,34 +233,59 @@ class UALossesParser:
 
     def _parse_soldier(self, url: str, soup: BeautifulSoup) -> Soldier:
         name = self._parse_name(soup)
-        posthumous_award_date, posthumous_award_url = self._parse_posthumous_award_fields(
+        posthumous_award_date, posthumous_award_date_precision, posthumous_award_url = self._parse_posthumous_award_fields(
             soup,
             "Posthumous award",
+        )
+
+        date_of_birth, date_of_birth_precision = (
+            self._parse_date_field(
+                soup,
+                "Date of birth",
+            )
+        )
+
+        date_of_death, date_of_death_precision = (
+            self._parse_date_field(
+                soup,
+                "Date of death",
+            )
+        )        
+
+        date_of_disappearance, date_of_disappearance_precision = (
+            self._parse_date_field(
+                soup,
+                "Date of disappearance",
+            )
+        )        
+
+        date_of_release_from_captivity, date_of_release_from_captivity_precision = (
+            self._parse_date_field(
+                soup,
+                "Date of release from captivity",
+            )
+        )
+
+        date_of_burial, date_of_burial_precision = (
+            self._parse_date_field(
+                soup,
+                "Date of burial",
+            )
         )
 
         return Soldier(
             source_url=url,
             name=name,
-            date_of_birth=self._parse_date_field(
-                soup,
-                "Date of birth",
-            ),
-            date_of_death=self._parse_date_field(
-                soup,
-                "Date of death",
-            ),
-            date_of_disappearance=self._parse_date_field(
-                soup,
-                "Date of disappearance",
-            ),
-            date_of_release_from_captivity=self._parse_date_field(
-                soup,
-                "Date of release from captivity",
-            ),
-            date_of_burial=self._parse_date_field(
-                soup,
-                "Date of burial",
-            ),
+            date_of_birth=date_of_birth,
+            date_of_birth_precision=date_of_birth_precision,
+            date_of_death=date_of_death,
+            date_of_death_precision=date_of_death_precision,
+            date_of_disappearance=date_of_disappearance,
+            date_of_disappearance_precision=date_of_disappearance_precision,
+            date_of_release_from_captivity=date_of_release_from_captivity,
+            date_of_release_from_captivity_precision=date_of_release_from_captivity_precision,
+            date_of_burial=date_of_burial,
+            date_of_burial_precision=date_of_burial_precision,
             conscription=self._parse_text_field(
                 soup,
                 "Conscription",
@@ -294,6 +319,7 @@ class UALossesParser:
                 "Rank",
             ),
             posthumous_award_date=posthumous_award_date,
+            posthumous_award_date_precision=posthumous_award_date_precision,
             posthumous_award_url=posthumous_award_url,
             military_unit=self._parse_military_unit_field(
                 soup,
@@ -356,15 +382,15 @@ class UALossesParser:
         self,
         soup: BeautifulSoup,
         field_name: str,
-    ) -> date | None:
+    ) -> tuple[date | None, DatePrecision | None]:
         value = self._parse_text_field(soup, field_name)
 
         if value is None:
-            return None
+            return None, None
 
         return self._parse_date(value)
 
-    def _parse_date(self, value: str) -> date:
+    def _parse_date(self, value: str) -> tuple[date, DatePrecision]:
         value = value.strip()
         
         # UA Losses uses "Sept." instead of the standard "Sep."
@@ -379,9 +405,15 @@ class UALossesParser:
 
         for fmt in formats:
             try:
-                return datetime.strptime(value, fmt).date()
+                parsed_date = datetime.strptime(value, fmt).date()
+                return (parsed_date, DatePrecision.DAY)
+
             except ValueError:
                 continue
+
+        if re.fullmatch(r"\d{4}", value):
+            year = int(value)
+            return (date(year, 1, 1), DatePrecision.YEAR)
 
         raise ValueError(f"Unknown date format: {value}")
 
@@ -459,7 +491,7 @@ class UALossesParser:
         self,
         soup: BeautifulSoup,
         field_name: str,
-    ) -> tuple[date | None, str | None]:
+    ) -> tuple[date | None, DatePrecision | None, str | None]:
         value = self._find_fact_value(soup, field_name)
 
         if value is None:
@@ -470,7 +502,7 @@ class UALossesParser:
         if link is None:
             return None, None
 
-        award_date = self._parse_date(link.get_text(" ", strip=True))
+        award_date, award_date_precision = self._parse_date(link.get_text(" ", strip=True))
 
         if award_date is None:
             return None, None
@@ -480,7 +512,7 @@ class UALossesParser:
             link["href"],
         )
 
-        return award_date, award_url
+        return (award_date, award_date_precision, award_url)
 
     def _parse_sources(
         self,

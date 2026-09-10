@@ -130,12 +130,13 @@ def demo_crawler():
 
 
 links = [
-    "https://ualosses.org/en/soldier/andryeyev-oleksij-oleksandrovych-1996-06-30-25-novomoskovsk-25th-separate-airborne-brigade-senior-sergeant/",
-    "https://ualosses.org/en/soldier/derjahin-roman-jurijovych-1972-06-29-50-rubizhne-92nd-separate-mechanized-brigade-senior-soldier/"
+    # "https://ualosses.org/en/soldier/andryeyev-oleksij-oleksandrovych-1996-06-30-25-novomoskovsk-25th-separate-airborne-brigade-senior-sergeant/",
+    # "https://ualosses.org/en/soldier/derjahin-roman-jurijovych-1972-06-29-50-rubizhne-92nd-separate-mechanized-brigade-senior-soldier/"
     # urls[0],
+    "https://ualosses.org/en/soldier/akritov-roman-volodymyrovych-1973-02-02-zaporizhzhja-9th-operation-regiment-soldier/",
 ]
 
-# demo_soldier_page(links)
+demo_soldier_page(links)
 
 names = [
     "z",
