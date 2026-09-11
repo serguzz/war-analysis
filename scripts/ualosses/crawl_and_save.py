@@ -15,9 +15,9 @@ FAILED_URLS_FILE.parent.mkdir(
     exist_ok=True,
 )
 
-def log_failed_url(url: str) -> None:
+def log_failed_url(exc: Exception, url: str) -> None:
     with FAILED_URLS_FILE.open("a", encoding="utf-8") as file:
-        file.write(f"{url}\n")
+        file.write(f"{type(exc).__name__}: {exc}\t{url}\n")
 
 def main():
     parser = UALossesParser()
@@ -37,7 +37,7 @@ def main():
         
         urls = set()
         # for symbol in "lmnopqrstuvwxyz":
-        for symbol in "l":
+        for symbol in "m":
             prefix = 'a' + symbol
             symbol_urls = crawler.crawl_prefix(prefix)
             urls.update(symbol_urls)
@@ -70,7 +70,7 @@ def main():
                     f"{url}: "
                     f"{type(exc).__name__}: {exc}"
                 )
-                log_failed_url(url)
+                log_failed_url(exc, url)
 
             finally:
                 processed += 1
