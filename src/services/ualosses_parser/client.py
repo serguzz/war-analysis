@@ -65,7 +65,7 @@ class UALossesClient:
     ) -> str:
         response = self.session.get(
             url,
-            timeout=30,
+            timeout=20,
         )
 
         response.raise_for_status()
