@@ -89,7 +89,7 @@ class UALossesCrawler:
         self,
         parser,
         *,
-        delay_sec: float = 0.5,
+        delay_sec: float = 0.3,
     ):
         self.parser = parser
         self.delay_sec = delay_sec

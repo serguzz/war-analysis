@@ -33,14 +33,14 @@ def main():
         errors = 0
 
         #urls = crawler.root_crawl(LIMIT)
-        # urls = crawler.crawl_prefix("a", LIMIT)
+        urls = crawler.crawl_prefix("b")
         
-        urls = set()
-        # for symbol in "lmnopqrstuvwxyz":
-        for symbol in "m":
+        """urls = set()
+        for symbol in "nopqrstuvwxyz":
+        # for symbol in "m":
             prefix = 'a' + symbol
             symbol_urls = crawler.crawl_prefix(prefix)
-            urls.update(symbol_urls)
+            urls.update(symbol_urls)"""
 
         for url in sorted(urls):
 
