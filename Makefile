@@ -1,4 +1,4 @@
-.PHONY: build run up down shell
+.PHONY: build run up down shell db-backup
 
 build:
 	docker compose build
@@ -23,6 +23,9 @@ down:
 
 shell:
 	docker compose run --rm app bash
+
+db-backup:
+	python3 scripts/db/backup/backup_all.py
 
 test:
 	docker compose run --rm app python -m pytest -v
