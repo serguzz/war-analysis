@@ -1,20 +1,17 @@
 import random
 from datetime import date, timedelta
 
+from src.services.osint_sources.deepstatemap.client import DeepStateMapClient
 from src.services.osint_sources.deepstatemap.config import (
+    FILE_NAME_TEMPLATE,
     FIRST_AVAILABLE_DATE,
 )
 from src.services.osint_sources.deepstatemap.exceptions import (
     DeepStateMapNotFound,
 )
-from src.services.osint_sources.deepstatemap.service import (
-    DeepStateMapService,
-)
-
-from src.services.osint_sources.deepstatemap.config import FILE_NAME_TEMPLATE
 
 
-SAMPLE_SIZE = 20
+SAMPLE_SIZE = 15
 
 
 def get_random_dates(
@@ -41,7 +38,7 @@ def get_random_dates(
 
 
 def main():
-    service = DeepStateMapService()
+    client = DeepStateMapClient()
 
     dates = get_random_dates(
         date_from=FIRST_AVAILABLE_DATE,
@@ -56,8 +53,15 @@ def main():
 
     for snapshot_date in dates:
         try:
-            snapshot = service.get_snapshot(snapshot_date)
-            snapshots.append(snapshot)
+            data = client.get_geojson(snapshot_date)
+
+            snapshots.append(
+                (
+                    snapshot_date,
+                    data,
+                )
+            )
+
             print(
                 f"{snapshot_date} - loaded"
             )
@@ -81,7 +85,7 @@ def analyze_snapshots(snapshots):
         return
 
     analyze_root_fields(snapshots)
-    analyze_names(snapshots)    
+    analyze_names(snapshots)
     analyze_crs(snapshots)
     analyze_features(snapshots)
 
@@ -93,25 +97,20 @@ def analyze_root_fields(snapshots):
 
     all_keys = set()
 
-    for snapshot in snapshots:
-        all_keys.update(
-            snapshot.keys()
-        )
+    for _, data in snapshots:
+        all_keys.update(data.keys())
 
     for key in sorted(all_keys):
-
         values = []
         present_count = 0
 
-        for snapshot in snapshots:
-            if key in snapshot.geojson:
+        for _, data in snapshots:
+            if key in data:
                 present_count += 1
-
-                value = snapshot.geojson[key]
 
                 if key != "features":
                     values.append(
-                        repr(value)
+                        repr(data[key])
                     )
 
         print()
@@ -139,6 +138,40 @@ def analyze_root_fields(snapshots):
                 print(f"  {value}")
 
 
+def analyze_names(snapshots):
+    print()
+    print("=" * 60)
+    print("NAME")
+    print("-" * 60)
+
+    mismatches = 0
+
+    for snapshot_date, data in snapshots:
+        expected_name = FILE_NAME_TEMPLATE.format(
+            date=snapshot_date,
+        ).removesuffix(".geojson")
+
+        actual_name = data.get("name")
+
+        matches = actual_name == expected_name
+
+        if not matches:
+            mismatches += 1
+
+        print(
+            f"{snapshot_date} | "
+            f"expected={expected_name} | "
+            f"actual={actual_name} | "
+            f"match={matches}"
+        )
+
+    print()
+    print(
+        f"Name mismatches: "
+        f"{mismatches}/{len(snapshots)}"
+    )
+
+
 def analyze_crs(snapshots):
     print()
     print("=" * 60)
@@ -146,11 +179,10 @@ def analyze_crs(snapshots):
     print("-" * 60)
 
     values = []
-
     missing_count = 0
 
-    for snapshot in snapshots:
-        crs = snapshot.geojson.get("crs")
+    for _, data in snapshots:
+        crs = data.get("crs")
 
         if crs is None:
             missing_count += 1
@@ -191,8 +223,8 @@ def analyze_features(snapshots):
     properties_values = set()
     geometry_types = set()
 
-    for snapshot in snapshots:
-        features = snapshot.geojson.get(
+    for _, data in snapshots:
+        features = data.get(
             "features",
             [],
         )
@@ -202,7 +234,6 @@ def analyze_features(snapshots):
         )
 
         for feature in features:
-
             feature_types.add(
                 feature.get("type")
             )
@@ -243,40 +274,6 @@ def analyze_features(snapshots):
     print(
         f"Geometry types: "
         f"{geometry_types}"
-    )
-
-
-def analyze_names(snapshots):
-    print()
-    print("=" * 60)
-    print("NAME")
-    print("-" * 60)
-
-    mismatches = 0
-
-    for snapshot in snapshots:
-        expected_name = FILE_NAME_TEMPLATE.format(
-            date=snapshot.date
-        ).removesuffix(".geojson")
-
-        actual_name = snapshot.geojson.get("name")
-
-        matches = actual_name == expected_name
-
-        if not matches:
-            mismatches += 1
-
-        print(
-            f"{snapshot.date} | "
-            f"expected={expected_name} | "
-            f"actual={actual_name} | "
-            f"match={matches}"
-        )
-
-    print()
-    print(
-        f"Name mismatches: "
-        f"{mismatches}/{len(snapshots)}"
     )
 
 
