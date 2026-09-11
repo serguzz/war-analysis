@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from src.services.ualosses_parser import UALossesParser
 
 
-BASE_DIR = Path(__file__).resolve().parents[1]
+BASE_DIR = Path(__file__).resolve().parents[2]
 
 # Analysis period
 DATE_START = date(2022, 2, 24)

@@ -13,7 +13,7 @@ from pathlib import Path
 
 from src.services.ualosses_parser import UALossesParser, UALossesClient, UALossesCrawler
 
-BASE_DIR = Path(__file__).resolve().parents[1]
+BASE_DIR = Path(__file__).resolve().parents[2]
 
 client = UALossesClient()
 parser = UALossesParser()
