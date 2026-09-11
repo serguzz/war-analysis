@@ -5,6 +5,9 @@ from .models import (
     DeepStateMapSnapshot,
 )
 
+from .exceptions import (
+    DeepStateMapParseError,
+)
 
 class DeepStateMapParser:
 
@@ -15,7 +18,7 @@ class DeepStateMapParser:
     ) -> DeepStateMapSnapshot:
 
         if not isinstance(data, dict):
-            raise ValueError(
+            raise DeepStateMapParseError(
                 "Expected GeoJSON data to be a dictionary"
             )
 
