@@ -1,8 +1,48 @@
-# Orchestration service
-# Knows how to get from / put to DB
-# Knows what to call to crawl deepstatemap github for certain date
-# Gets date ranges from DB, or deepstatemap github
+from datetime import date, timedelta
 
-# Additionally, can handle visualization / and demonstration of geogis data
+from .client import DeepStateMapClient
+from .models import DeepStateMapSnapshot
+from .parser import DeepStateMapParser
 
-# Q: Should move DB handling to a separate service in this folder?
+
+class DeepStateMapService:
+
+    def __init__(self):
+        self.client = DeepStateMapClient()
+        self.parser = DeepStateMapParser()
+
+    def get_snapshot(
+        self,
+        snapshot_date: date,
+    ) -> DeepStateMapSnapshot:
+
+        data = self.client.get_geojson(
+            snapshot_date,
+        )
+
+        return self.parser.parse(
+            snapshot_date=snapshot_date,
+            data=data,
+        )
+
+    def get_snapshots(
+        self,
+        date_from: date,
+        date_to: date,
+    ) -> list[DeepStateMapSnapshot]:
+
+        snapshots = []
+
+        current_date = date_from
+
+        while current_date <= date_to:
+
+            snapshot = self.get_snapshot(
+                current_date,
+            )
+
+            snapshots.append(snapshot)
+
+            current_date += timedelta(days=1)
+
+        return snapshots
