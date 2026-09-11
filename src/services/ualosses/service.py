@@ -247,14 +247,18 @@ class UALossesService:
         data = {
             "name": soldier.name,
             "date_of_birth": soldier.date_of_birth,
+            "date_of_birth_precision": soldier.date_of_birth_precision,
             "date_of_disappearance": soldier.date_of_disappearance,
+            "date_of_disappearance_precision": soldier.date_of_disappearance_precision,
             "date_of_death": soldier.date_of_death,
+            "date_of_death_precision": soldier.date_of_death_precision,
             "date_of_burial": soldier.date_of_burial,
-            "date_of_release_from_captivity": (
-                soldier.date_of_release_from_captivity
-            ),
+            "date_of_burial_precision": soldier.date_of_burial_precision,
+            "date_of_release_from_captivity": soldier.date_of_release_from_captivity,
+            "date_of_release_from_captivity_precision": soldier.date_of_release_from_captivity_precision,
             "conscription": soldier.conscription,
             "posthumous_award_date": soldier.posthumous_award_date,
+            "posthumous_award_date_precision": soldier.posthumous_award_date_precision,
             "posthumous_award_url": soldier.posthumous_award_url,
             "cause_of_death": soldier.cause_of_death,
             "rank": soldier.rank,
@@ -278,7 +282,6 @@ class UALossesService:
 
         if db_soldier is None:
             data["source_url"] = soldier.source_url
-
             db_soldier = self.soldier_repo.create(data)
 
         else:

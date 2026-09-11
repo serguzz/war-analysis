@@ -5,7 +5,14 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 
 from .client import UALossesClient
-from .models import DatePrecision, Location, Place, Soldier, MilitaryUnit, SoldierListItem
+from .models import (
+    DatePrecision,
+    Location,
+    Place,
+    Soldier,
+    MilitaryUnit,
+    SoldierListItem
+)
 
 
 class UALossesParser:
@@ -499,10 +506,10 @@ class UALossesParser:
 
         link = value.find("a", href=True)
 
-        award_date, award_date_precision = self._parse_date(link.get_text(" ", strip=True))
+        if link is None:
+            return None, None, None
 
-        if award_date is None:
-            return None, None, link
+        award_date, award_date_precision = self._parse_date(link.get_text(" ", strip=True))
 
         award_url = urljoin(
             self.BASE_URL,
