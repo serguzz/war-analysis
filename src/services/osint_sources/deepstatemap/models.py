@@ -6,4 +6,4 @@ from typing import Any
 @dataclass
 class DeepStateMapSnapshot:
     date: date
-    geojson: dict[str, Any]
+    geometry: dict[str, Any]

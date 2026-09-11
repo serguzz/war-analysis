@@ -95,7 +95,7 @@ def analyze_root_fields(snapshots):
 
     for snapshot in snapshots:
         all_keys.update(
-            snapshot.geojson.keys()
+            snapshot.keys()
         )
 
     for key in sorted(all_keys):
