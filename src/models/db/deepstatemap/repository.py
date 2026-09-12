@@ -29,13 +29,23 @@ class DeepStateMapGeoDataRepository:
         snapshot_date: date,
         geometry: Any,
     ) -> DeepStateMapGeoData:
-
         geo_data = DeepStateMapGeoData(
             snapshot_date=snapshot_date,
             geometry=geometry,
         )
 
         self.session.add(geo_data)
+        self.session.flush()
+
+        return geo_data
+
+
+    def update(
+        self,
+        geo_data: DeepStateMapGeoData,
+        geometry: Any,
+    ) -> DeepStateMapGeoData:
+        geo_data.geometry = geometry
         self.session.flush()
 
         return geo_data
