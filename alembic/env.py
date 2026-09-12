@@ -21,7 +21,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # Import all models so SQLAlchemy registers their tables
-from src.models.db import (
+from src.models.db.ualosses import (
     Location,
     MilitaryUnit,
     Place,

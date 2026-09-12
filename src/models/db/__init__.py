@@ -1,20 +1,7 @@
-from .database import Base, engine
-from .models import (
-    Location,
-    MilitaryUnit,
-    Place,
-    Soldier,
-    SoldierSource,
-    Source,
-)
+from .database import Base, engine, SessionLocal
 
 __all__ = [
     "Base",
     "engine",
-    "Location",
-    "MilitaryUnit",
-    "Place",
-    "Soldier",
-    "SoldierSource",
-    "Source"
+    "SessionLocal",
 ]

@@ -5,7 +5,7 @@ from datetime import date, timedelta
 from geoalchemy2.shape import from_shape
 from shapely.geometry import shape
 
-from src.models.db.database import SessionLocal
+from src.models.db import SessionLocal
 from src.models.db.deepstatemap.repository import DeepStateMapGeoDataRepository
 from src.services.osint_sources.deepstatemap.exceptions import DeepStateMapNotFound
 from src.services.osint_sources.deepstatemap.service import DeepStateMapService

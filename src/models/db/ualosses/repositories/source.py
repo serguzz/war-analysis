@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from src.models.db.models import Source
+from src.models.db.ualosses import Source
 from .base import BaseRepository
 
 

@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-from src.models.db.database import SessionLocal
+from src.models.db import SessionLocal
 from src.services.ualosses.service import UALossesService
 from src.services.ualosses_parser.parser import UALossesParser
 
