@@ -1,6 +1,6 @@
 import pytest
 
-from src.services.ualosses_parser.crawler import next_prefix
+from src.services.ualosses.crawler import next_prefix
 
 
 @pytest.mark.parametrize(

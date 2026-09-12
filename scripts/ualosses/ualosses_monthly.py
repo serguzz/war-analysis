@@ -4,7 +4,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 
-from src.services.ualosses_parser import UALossesParser
+from src.services.ualosses import UALossesParser
 
 
 BASE_DIR = Path(__file__).resolve().parents[2]
