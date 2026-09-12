@@ -33,7 +33,7 @@ def main():
         errors = 0
 
         #urls = crawler.root_crawl(LIMIT)
-        urls = crawler.crawl_prefix("c")
+        urls = crawler.crawl_prefix("d")
         
         """urls = set()
         for symbol in "nopqrstuvwxyz":
