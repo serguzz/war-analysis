@@ -49,3 +49,13 @@ class DeepStateMapGeoDataRepository:
         self.session.flush()
 
         return geo_data
+
+
+    def get_latest_date(self) -> date | None:
+        stmt = select(
+            DeepStateMapGeoData.snapshot_date
+        ).order_by(
+            DeepStateMapGeoData.snapshot_date.desc()
+        ).limit(1)
+
+        return self.session.scalar(stmt)
