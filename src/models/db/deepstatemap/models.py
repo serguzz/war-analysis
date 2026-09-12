@@ -3,8 +3,8 @@ import uuid
 from uuid import UUID
 
 from geoalchemy2 import Geometry
-from sqlalchemy import Date, DateTime, UniqueConstraint, func
-from sqlalchemy.orm import Mapped, mapped_column, Uuid
+from sqlalchemy import Date, DateTime, UniqueConstraint, Uuid, func
+from sqlalchemy.orm import Mapped, mapped_column
 
 from src.models.db.database import Base
 

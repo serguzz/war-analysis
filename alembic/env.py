@@ -30,6 +30,10 @@ from src.models.db import (
     Source,
 )
 
+from src.models.db.deepstatemap import (
+    DeepStateMapGeoData,
+)
+
 target_metadata = Base.metadata
 # target_metadata = None
 
