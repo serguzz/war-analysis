@@ -2,9 +2,11 @@ import sys
 from pathlib import Path
 
 from src.models.db import SessionLocal
-from src.services.ualosses.service import UALossesService
-from src.services.ualosses_parser.crawler import UALossesCrawler
-from src.services.ualosses_parser.parser import UALossesParser
+from src.services.ualosses import (
+    UALossesService,
+    UALossesCrawler,
+    UALossesParser,
+)
 
 BATCH_SIZE = 100
 LIMIT = int(sys.argv[1]) if len(sys.argv) > 1 else 1

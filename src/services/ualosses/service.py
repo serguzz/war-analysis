@@ -9,7 +9,7 @@ from src.models.db.ualosses import (
     Source as DBSource,
 )
 
-from src.services.ualosses_parser.models import (
+from .models import (
     Location,
     MilitaryUnit,
     Place,
