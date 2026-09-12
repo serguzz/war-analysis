@@ -45,6 +45,16 @@ target_metadata = Base.metadata
 DATABASE_URL = os.environ["DATABASE_URL"]
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
+# POSTGIS_TABLES = {"spatial_ref_sys", "geography_columns", "geometry_columns", "raster_columns", "raster_overviews"}
+
+def include_object(object, name, type_, reflected, compare_to):
+    """Ignore PostGIS system tables (and similar) during autogenerate."""
+    # Uncomment, if other PostGIS-managed tables:
+    # if type_ == "table" and name in POSTGIS_TABLES:
+    if type_ == "table" and name in ("spatial_ref_sys",):
+        return False
+    return True
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
@@ -63,6 +73,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_object=include_object,
     )
 
     with context.begin_transaction():
@@ -84,7 +95,9 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            include_object=include_object,
         )
 
         with context.begin_transaction():
