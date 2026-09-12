@@ -1,4 +1,5 @@
 import argparse
+from dataclasses import dataclass
 from datetime import date, timedelta
 
 from geoalchemy2.shape import from_shape
@@ -8,6 +9,14 @@ from src.models.db.database import SessionLocal
 from src.models.db.deepstatemap.repository import DeepStateMapGeoDataRepository
 from src.services.osint_sources.deepstatemap.exceptions import DeepStateMapNotFound
 from src.services.osint_sources.deepstatemap.service import DeepStateMapService
+
+@dataclass
+class ImportStats:
+    processed: int = 0
+    created: int = 0
+    updated: int = 0
+    not_found: int = 0
+    errors: int = 0
 
 
 def parse_date(value: str) -> date:
@@ -23,14 +32,14 @@ def import_snapshot(
     snapshot_date: date,
     service: DeepStateMapService,
     repository: DeepStateMapGeoDataRepository,
-) -> None:
+) -> str:
     print(f"Importing DeepStateMap snapshot: {snapshot_date}")
 
     try:
         snapshot = service.get_snapshot(snapshot_date)
     except DeepStateMapNotFound:
-        print(f"Snapshot not found: {snapshot_date}")
-        return
+        print(f"Not found: {snapshot_date}")
+        return "not_found"
 
     geometry = shape(snapshot.geometry)
 
@@ -48,13 +57,17 @@ def import_snapshot(
             geo_data=existing,
             geometry=geometry_db,
         )
+
         print(f"Updated successfully: {snapshot_date}")
-    else:
-        repository.create(
-            snapshot_date=snapshot_date,
-            geometry=geometry_db,
-        )
-        print(f"Imported successfully: {snapshot_date}")
+        return "updated"
+
+    repository.create(
+        snapshot_date=snapshot_date,
+        geometry=geometry_db,
+    )
+
+    print(f"Imported successfully: {snapshot_date}")
+    return "created"
 
 
 def main() -> None:
@@ -97,36 +110,60 @@ def main() -> None:
     ):
         parser.error("--date-from must be before or equal to --date-to")
 
+    if args.date is not None:
+        dates = [args.date]
+    else:
+        dates = (
+            args.date_from + timedelta(days=i)
+            for i in range(
+                (args.date_to - args.date_from).days + 1
+            )
+        )
+
     service = DeepStateMapService()
+    stats = ImportStats()
 
     with SessionLocal() as session:
         repository = DeepStateMapGeoDataRepository(session)
 
-        try:
-            if args.date is not None:
-                import_snapshot(
-                    snapshot_date=args.date,
+        for snapshot_date in dates:
+            stats.processed += 1
+
+            try:
+                result = import_snapshot(
+                    snapshot_date=snapshot_date,
                     service=service,
                     repository=repository,
                 )
 
-            else:
-                current_date = args.date_from
+                if result == "created":
+                    stats.created += 1
 
-                while current_date <= args.date_to:
-                    import_snapshot(
-                        snapshot_date=current_date,
-                        service=service,
-                        repository=repository,
-                    )
+                elif result == "updated":
+                    stats.updated += 1
 
-                    current_date += timedelta(days=1)
+                elif result == "not_found":
+                    stats.not_found += 1
 
-            session.commit()
+                session.commit()
 
-        except Exception:
-            session.rollback()
-            raise
+            except Exception as exc:
+                session.rollback()
+
+                stats.errors += 1
+
+                print(
+                    f"ERROR: {snapshot_date}: "
+                    f"{type(exc).__name__}: {exc}"
+                )
+
+    print()
+    print("Import completed.")
+    print(f"Processed:  {stats.processed}")
+    print(f"Created:    {stats.created}")
+    print(f"Updated:    {stats.updated}")
+    print(f"Not found:  {stats.not_found}")
+    print(f"Errors:     {stats.errors}")
 
 
 if __name__ == "__main__":
