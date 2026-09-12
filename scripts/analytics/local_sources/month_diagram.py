@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-BASE_DIR = Path(__file__).resolve().parents[1]
+BASE_DIR = Path(__file__).resolve().parents[3]
 
 ODS_PATH = BASE_DIR / "data" / "raw" / "sad_sheptytskiy_fb.ods"
 
@@ -73,7 +73,7 @@ def main() -> None:
     ]
 
     # Create chart
-    fig, ax = plt.subplots(figsize=(12, 6))
+    _, ax = plt.subplots(figsize=(12, 6))
 
     bars = ax.bar(
         month_labels,
@@ -121,6 +121,8 @@ def main() -> None:
         dpi=150,
         bbox_inches="tight",
     )
+
+    print(f"Diagram saved to file: {output_path}")
 
 if __name__ == "__main__":
     main()

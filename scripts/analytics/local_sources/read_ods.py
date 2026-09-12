@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 
-BASE_DIR = Path(__file__).resolve().parents[1]
+BASE_DIR = Path(__file__).resolve().parents[3]
 
 ODS_PATH = BASE_DIR / "data" / "raw" / "sad.ods"
 PARQUET_PATH = BASE_DIR / "data" / "processed" / "sad.parquet"
