@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from src.models.db.models import (
+from src.models.db.ualosses import (
     Location as DBLocation,
     MilitaryUnit as DBMilitaryUnit,
     Place as DBPlace,
@@ -16,7 +16,7 @@ from src.services.ualosses_parser.models import (
     Soldier,
 )
 
-from src.models.db.repositories import (
+from src.models.db.ualosses.repositories import (
     PlaceRepository,
     LocationRepository,
     MilitaryUnitRepository,

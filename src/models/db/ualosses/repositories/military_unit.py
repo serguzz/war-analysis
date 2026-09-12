@@ -1,8 +1,8 @@
-from sqlalchemy import select, update, delete
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from .base import BaseRepository
-from src.models.db.models import MilitaryUnit
+from src.models.db.ualosses import MilitaryUnit
 
 class MilitaryUnitRepository(BaseRepository[MilitaryUnit]):
 

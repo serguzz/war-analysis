@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from src.models.db.models import Location
+from src.models.db.ualosses import Location
 
 from .base import BaseRepository
 

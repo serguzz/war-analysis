@@ -12,7 +12,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from src.services.ualosses_parser.models import DatePrecision
 
-from .database import Base
+from src.models.db import Base
 
 
 DATE_PRECISION_ENUM = Enum(

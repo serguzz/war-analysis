@@ -1,7 +1,7 @@
 # src/models/db/repositories/base.py
 from typing import Generic, Type, TypeVar, Optional, Sequence
 from uuid import UUID
-from sqlalchemy import select, update, delete
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 # Працює з будь-якою моделлю SQLAlchemy

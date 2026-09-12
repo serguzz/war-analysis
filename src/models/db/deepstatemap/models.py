@@ -6,7 +6,7 @@ from geoalchemy2 import Geometry
 from sqlalchemy import Date, DateTime, UniqueConstraint, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.models.db.database import Base
+from src.models.db import Base
 
 
 class DeepStateMapGeoData(Base):
