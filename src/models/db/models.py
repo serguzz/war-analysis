@@ -1,6 +1,3 @@
-# Example model only
-# Edit this before running migrations
-
 import uuid
 from uuid import UUID
 from datetime import date, datetime

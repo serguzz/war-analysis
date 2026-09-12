@@ -72,59 +72,180 @@ def import_snapshot(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Import historical DeepStateMap snapshots into PostgreSQL."
+        description="Import DeepStateMap snapshots into PostgreSQL."
     )
 
-    date_group = parser.add_mutually_exclusive_group(required=True)
-
-    date_group.add_argument(
+    parser.add_argument(
         "--date",
         type=parse_date,
-        help="Import one snapshot, e.g. 2024-07-08.",
+        help="Import one snapshot.",
     )
 
-    date_group.add_argument(
+    parser.add_argument(
         "--date-from",
         type=parse_date,
-        help="Start date for historical import.",
+        help="Start date for import.",
     )
 
     parser.add_argument(
         "--date-to",
         type=parse_date,
-        help="End date for historical import.",
+        help="End date for import.",
+    )
+
+    parser.add_argument(
+        "--update",
+        action="store_true",
+        help=(
+            "Import snapshots from the day after the latest "
+            "snapshot in the database up to today."
+        ),
     )
 
     args = parser.parse_args()
 
-    if args.date_from is not None and args.date_to is None:
-        parser.error("--date-to is required with --date-from")
+    # ---------------------------------------------------------
+    # Validate argument combinations
+    # ---------------------------------------------------------
 
-    if args.date_to is not None and args.date_from is None:
-        parser.error("--date-from is required with --date-to")
+    has_single_date = args.date is not None
 
+    has_date_from = args.date_from is not None
+    has_date_to = args.date_to is not None
+
+    has_date_range = (
+        has_date_from
+        or has_date_to
+    )
+
+    has_update = args.update
+
+    # --date-from and --date-to must be used together
+    if has_date_from and not has_date_to:
+        parser.error(
+            "--date-to is required with --date-from"
+        )
+
+    if has_date_to and not has_date_from:
+        parser.error(
+            "--date-from is required with --date-to"
+        )
+
+    # --date cannot be combined with range
+    if has_single_date and has_date_range:
+        parser.error(
+            "--date cannot be used with "
+            "--date-from or --date-to"
+        )
+
+    # --update cannot be combined with any other mode
+    if has_update and has_single_date:
+        parser.error(
+            "--update cannot be used with --date"
+        )
+
+    if has_update and has_date_range:
+        parser.error(
+            "--update cannot be used with "
+            "--date-from or --date-to"
+        )
+
+    # One import mode is required
     if (
-        args.date_from is not None
-        and args.date_to is not None
+        not has_single_date
+        and not has_date_range
+        and not has_update
+    ):
+        parser.error(
+            "One of the following modes is required: "
+            "--date, --date-from with --date-to, or --update"
+        )
+
+    # Validate date range
+    if (
+        has_date_from
+        and has_date_to
         and args.date_from > args.date_to
     ):
-        parser.error("--date-from must be before or equal to --date-to")
-
-    if args.date is not None:
-        dates = [args.date]
-    else:
-        dates = (
-            args.date_from + timedelta(days=i)
-            for i in range(
-                (args.date_to - args.date_from).days + 1
-            )
+        parser.error(
+            "--date-from must be before or equal to --date-to"
         )
 
     service = DeepStateMapService()
     stats = ImportStats()
 
     with SessionLocal() as session:
-        repository = DeepStateMapGeoDataRepository(session)
+        repository = DeepStateMapGeoDataRepository(
+            session
+        )
+
+        # -----------------------------------------------------
+        # Determine dates to import
+        # -----------------------------------------------------
+
+        if has_single_date:
+            dates = [args.date]
+
+        elif has_date_range:
+            dates = (
+                args.date_from + timedelta(days=i)
+                for i in range(
+                    (
+                        args.date_to
+                        - args.date_from
+                    ).days
+                    + 1
+                )
+            )
+
+        else:
+            today = date.today()
+
+            latest_snapshot_date = (
+                repository.get_latest_date()
+            )
+
+            if latest_snapshot_date is None:
+                print(
+                    "No DeepStateMap data found "
+                    "in the database."
+                )
+                return
+
+            print(
+                "Latest snapshot date in database: "
+                f"{latest_snapshot_date}"
+            )
+
+            if latest_snapshot_date >= today:
+                print(
+                    "DeepStateMap data is already "
+                    "up to date."
+                )
+                return
+
+            date_from = (
+                latest_snapshot_date
+                + timedelta(days=1)
+            )
+
+            date_to = today
+
+            print(
+                f"Importing snapshots from "
+                f"{date_from} to {date_to}"
+            )
+
+            dates = (
+                date_from + timedelta(days=i)
+                for i in range(
+                    (date_to - date_from).days + 1
+                )
+            )
+
+        # -----------------------------------------------------
+        # Import snapshots
+        # -----------------------------------------------------
 
         for snapshot_date in dates:
             stats.processed += 1
