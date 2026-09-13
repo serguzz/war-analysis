@@ -14,7 +14,6 @@ SELECT
     s.conscription,
     s.rank,
 
-    -- s.wounded,
 
     -- Military unit
     mu.name AS military_unit_name,
@@ -48,7 +47,22 @@ SELECT
     disappeared_district.url AS disappeared_district_url,
 
     disappeared_oblast.name AS disappeared_oblast_name,
-    disappeared_oblast.url AS disappeared_oblast_url
+    disappeared_oblast.url AS disappeared_oblast_url,
+
+    -- WOUNDED LOCATION
+
+    wounded_settlement.name AS wounded_settlement_name,
+    wounded_settlement.url AS wounded_settlement_url,
+
+    wounded_community.name AS wounded_community_name,
+    wounded_community.url AS wounded_community_url,
+
+    wounded_district.name AS wounded_district_name,
+    wounded_district.url AS wounded_district_url,
+
+    wounded_oblast.name AS wounded_oblast_name,
+    wounded_oblast.url AS wounded_oblast_url
+
 
 
 FROM soldiers s
@@ -91,6 +105,22 @@ LEFT JOIN places disappeared_district
 
 LEFT JOIN places disappeared_oblast
     ON disappeared_oblast.id = disappeared_location.oblast_id
+
+-- WOUNDED LOCATION
+LEFT JOIN locations wounded_location
+    ON wounded_location.id = s.wounded_location_id
+
+LEFT JOIN places wounded_settlement
+    ON wounded_settlement.id = wounded_location.settlement_id
+
+LEFT JOIN places wounded_community
+    ON wounded_community.id = wounded_location.community_id
+
+LEFT JOIN places wounded_district
+    ON wounded_district.id = wounded_location.district_id
+
+LEFT JOIN places wounded_oblast
+    ON wounded_oblast.id = wounded_location.oblast_id
 
 
 WHERE s.name LIKE 'Shevchenko Taras%';

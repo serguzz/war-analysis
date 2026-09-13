@@ -386,6 +386,13 @@ class Soldier(Base):
         index=True,
     )
 
+    wounded_location_id: Mapped[UUID | None] = mapped_column(
+        Uuid,
+        ForeignKey("locations.id"),
+        nullable=True,
+        index=True,
+    )
+
     military_unit_id: Mapped[UUID | None] = mapped_column(
         Uuid,
         ForeignKey("military_units.id"),
