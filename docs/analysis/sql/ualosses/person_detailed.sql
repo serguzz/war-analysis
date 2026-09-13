@@ -3,7 +3,18 @@ SELECT
     s.name,
     s.source_url,
     s.date_of_birth,
+    s.date_of_death,
+    s.date_of_burial,
+    
     s.date_of_disappearance,
+
+    s.posthumous_award_date,
+
+    s.cause_of_death,
+    s.conscription,
+    s.rank,
+
+    -- s.wounded,
 
     -- Military unit
     mu.name AS military_unit_name,

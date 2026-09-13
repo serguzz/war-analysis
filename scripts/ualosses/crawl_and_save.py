@@ -35,10 +35,10 @@ def main():
         errors = 0
 
         #urls = crawler.root_crawl(LIMIT)
-        urls = crawler.crawl_prefix("f")
+        urls = crawler.crawl_prefix("m", LIMIT)
         
         """urls = set()
-        for symbol in "fghijklmnopqrstuvwxyz":
+        for symbol in "hijklmnopqrstuvwxyz":
             symbol_urls = crawler.crawl_prefix(symbol)
             urls.update(symbol_urls)"""
 
