@@ -1,6 +1,10 @@
 from pathlib import Path
 
-from src.services.ualosses import UALossesParser, UALossesClient, UALossesCrawler
+from src.services.osint_sources.ualosses import (
+    UALossesParser,
+    UALossesClient,
+    UALossesCrawler,
+)
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 

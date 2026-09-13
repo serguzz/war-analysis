@@ -15,7 +15,7 @@
 
 import argparse
 
-from src.services.ualosses import UALossesParser, UALossesCrawler
+from src.services.osint_sources.ualosses import UALossesParser, UALossesCrawler
 
 
 def process_soldiers(urls: list[str]):

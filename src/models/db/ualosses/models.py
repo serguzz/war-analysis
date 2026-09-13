@@ -10,7 +10,7 @@ from sqlalchemy import (
     )
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.services.ualosses.models import DatePrecision
+from src.services.osint_sources.ualosses.models import DatePrecision
 
 from src.models.db import Base
 
