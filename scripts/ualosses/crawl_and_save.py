@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+import logging
 
 from src.models.db import SessionLocal
 from src.services.osint_sources.ualosses import (
@@ -7,6 +8,14 @@ from src.services.osint_sources.ualosses import (
     UALossesParser,
 )
 from src.services.osint_sources.ualosses.service import UALossesService
+
+
+logging.basicConfig(
+    level=logging.INFO, 
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 100
 LIMIT = int(sys.argv[1]) if len(sys.argv) > 1 else 1
@@ -35,15 +44,18 @@ def main():
         errors = 0
 
         #urls = crawler.root_crawl(LIMIT)
-        urls = crawler.crawl_prefix("m", LIMIT)
+        urls = crawler.crawl_prefix("h")
         
         """urls = set()
         for symbol in "hijklmnopqrstuvwxyz":
             symbol_urls = crawler.crawl_prefix(symbol)
-            urls.update(symbol_urls)"""
+            logger.info(f"Collected {len(symbol_urls)} URLs")
+            urls.update(symbol_urls)
+            """
+
+        logger.info(f"Total collected {len(urls)} URLs")
 
         for url in sorted(urls):
-
             if processed >= LIMIT:
                 break
 
