@@ -121,6 +121,46 @@ def demo_crawler():
             print(url)
 
 
+def demo_soldier_parse_and_save(links: list):
+    from src.models.db import SessionLocal
+    from src.services.osint_sources.ualosses.service import UALossesService
+    
+    with SessionLocal() as session:
+        service = UALossesService(session)
+        
+        for link in sorted(links):
+            try:
+                with session.begin_nested():
+                    parsed_soldier = parser.get_soldier(link)
+                    result = service.save_soldier(parsed_soldier)
+
+                if result.created:
+                    print(f"Created soldier from {link}")
+                else:
+                    print(f"Updated soldier from {link}")
+
+            except Exception as exc:
+
+                print(
+                    f"[ERROR] "
+                    f"{link}: "
+                    f"{type(exc).__name__}: {exc}"
+                )
+
+            try:
+                session.commit()
+                print(f"Committed soldier")
+
+            except Exception as exc:
+                session.rollback()
+
+                print(
+                    f"[ERROR] "
+                    f"after last soldier: "
+                    f"{type(exc).__name__}: {exc}"
+                )
+
+
 
 links = [
     # "https://ualosses.org/en/soldier/andryeyev-oleksij-oleksandrovych-1996-06-30-25-novomoskovsk-25th-separate-airborne-brigade-senior-sergeant/",
@@ -129,7 +169,8 @@ links = [
     "https://ualosses.org/en/soldier/machacha-vadym-oleksandrovych-1996-04-04-26-halajbyne-16th-separate-motorized-infantry-battalion-soldier/",
 ]
 
-demo_soldier_page(links)
+# demo_soldier_page(links)
+demo_soldier_parse_and_save(links)
 
 names = [
     "z",
