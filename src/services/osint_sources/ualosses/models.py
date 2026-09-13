@@ -63,6 +63,7 @@ class Soldier:
     disappeared_in: Location | None = None
     died_in: Location | None = None
     buried_in: Location | None = None
+    wounded_location: Location | None = None
 
     rank: str | None = None
     position: str | None = None

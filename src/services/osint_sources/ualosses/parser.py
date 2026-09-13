@@ -321,6 +321,10 @@ class UALossesParser:
                 soup,
                 "Buried in",
             ),
+            wounded_location=self._parse_location_field(
+                soup,
+                "Wounded",
+            ),
             rank=self._parse_text_field(
                 soup,
                 "Rank",

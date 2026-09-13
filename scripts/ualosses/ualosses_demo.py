@@ -126,7 +126,7 @@ links = [
     # "https://ualosses.org/en/soldier/andryeyev-oleksij-oleksandrovych-1996-06-30-25-novomoskovsk-25th-separate-airborne-brigade-senior-sergeant/",
     # "https://ualosses.org/en/soldier/derjahin-roman-jurijovych-1972-06-29-50-rubizhne-92nd-separate-mechanized-brigade-senior-soldier/"
     # urls[0],
-    "https://ualosses.org/en/soldier/aleksandrov-bohdan-oleksandrovych-23-chernjakhiv-captain/",
+    "https://ualosses.org/en/soldier/machacha-vadym-oleksandrovych-1996-04-04-26-halajbyne-16th-separate-motorized-infantry-battalion-soldier/",
 ]
 
 demo_soldier_page(links)

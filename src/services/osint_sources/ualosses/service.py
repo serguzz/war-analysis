@@ -244,6 +244,10 @@ class UALossesService:
             soldier.buried_in
         )
 
+        wounded_location = self._get_or_create_location(
+            soldier.wounded_location
+        )
+
         data = {
             "name": soldier.name,
             "date_of_birth": soldier.date_of_birth,
@@ -277,6 +281,9 @@ class UALossesService:
             ),
             "buried_in_id": (
                 buried_in.id if buried_in else None
+            ),
+            "wounded_location_id": (
+                wounded_location.id if wounded_location else None
             ),
         }
 
