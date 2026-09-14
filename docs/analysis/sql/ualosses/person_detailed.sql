@@ -13,6 +13,7 @@ SELECT
     s.cause_of_death,
     s.conscription,
     s.rank,
+    s.position,
 
 
     -- Military unit

@@ -17,16 +17,16 @@ ALPHABET = SYMBOLS + LETTERS
 SOLDIERS_PER_PAGE = 100
 MAX_PAGE = 499
 
-def normalize_last_name(name: str) -> str:
+def normalize_name(name: str) -> str:
     return name.lower()
 
 
-def last_name_starts_with(
+def full_name_starts_with(
     name: str,
     prefix: str,
 ) -> bool:
-    return normalize_last_name(name).startswith(
-        normalize_last_name(prefix)
+    return normalize_name(name).startswith(
+        normalize_name(prefix)
     )
 
 
@@ -36,7 +36,7 @@ def next_prefix(prefix: str) -> str:
 
     Returns an empty string when no upper bound exists.
     """
-    prefix = normalize_last_name(prefix)
+    prefix = normalize_name(prefix)
 
     if not prefix:
         return ""
@@ -93,6 +93,7 @@ class UALossesCrawler:
     ):
         self.parser = parser
         self.delay_sec = delay_sec
+
 
     def crawl_prefixes(
         self,
@@ -206,13 +207,7 @@ class UALossesCrawler:
             
             all_urls.update(urls)
 
-
         sorted_urls = sorted(all_urls)
-
-        """for url in sorted_urls[:50]:
-            print(url)
-        for url in sorted_urls[-50:]:
-            print(url)"""
 
         return sorted_urls
 
@@ -230,7 +225,7 @@ class UALossesCrawler:
         hi = max_page
         first_page: int | None = None
 
-        normalized_prefix = normalize_last_name(prefix)
+        normalized_prefix = normalize_name(prefix)
 
         while lo <= hi:
             mid = (lo + hi) // 2
@@ -247,14 +242,14 @@ class UALossesCrawler:
                 continue
 
             if any(
-                last_name_starts_with(record.last_name,normalized_prefix)
+                full_name_starts_with(record.full_name, normalized_prefix)
                 for record in records
             ):
                 first_page = mid
                 hi = mid - 1
                 continue
 
-            last_name = normalize_last_name(records[-1].last_name)
+            last_name = normalize_name(records[-1].full_name)
 
             if last_name < normalized_prefix:
                 lo = mid + 1
@@ -276,7 +271,7 @@ class UALossesCrawler:
         """
         urls: set[str] = set()
 
-        normalized_prefix = normalize_last_name(prefix)
+        normalized_prefix = normalize_name(prefix)
         upper_bound = next_prefix(prefix)
         logger.info(f"Next prefix is: {upper_bound}")
 
@@ -300,19 +295,17 @@ class UALossesCrawler:
             if not records:
                 break
 
-            first_last_name = normalize_last_name(
-                records[0].last_name
-            )
+            first_full_name = normalize_name(records[0].full_name)
 
             if (
                 upper_bound
-                and first_last_name >= upper_bound
+                and first_full_name >= upper_bound
             ):
                 break
 
             for record in records:
-                if last_name_starts_with(
-                    record.last_name,
+                if full_name_starts_with(
+                    record.full_name,
                     normalized_prefix,
                 ):
                     urls.add(record.url)
