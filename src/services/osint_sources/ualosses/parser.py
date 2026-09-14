@@ -3,6 +3,7 @@ from datetime import date, datetime
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
+from src.config.countries import COUNTRIES
 
 from .client import UALossesClient
 from .models import (
@@ -14,7 +15,7 @@ from .models import (
     SoldierListItem
 )
 from .config import BASE_URL
-
+from src.utils.parser_utils import parse_date, parse_optional_date
 
 class UALossesParser:
     
@@ -191,7 +192,6 @@ class UALossesParser:
         for link in soup.select('a[href*="/en/soldier/"]'):
 
             name_element = link.find("b")
-
             if name_element is None:
                 continue
 
@@ -199,24 +199,36 @@ class UALossesParser:
                 " ",
                 strip=True,
             )
-
             if not full_name:
                 continue
 
             href = link.get("href")
-
             if not href:
                 continue
+            
+            date_of_birth=None
+            date_of_death=None
+            country=None
 
-            last_name = full_name.split()[0]
+            parent_item = link.find_parent("li")
+            if parent_item is not None:
+                for text in parent_item.stripped_strings:
+                    if " - " in text:
+                        date_of_birth, _, date_of_death, _ = self._parse_listing_dates(text)
+
+                    elif text in COUNTRIES:
+                        country = text
 
             items.append(
                 SoldierListItem(
-                    last_name=last_name,
+                    full_name=full_name,
                     url=urljoin(
                         BASE_URL,
                         href,
                     ),
+                    date_of_birth=date_of_birth,
+                    date_of_death=date_of_death,
+                    country=country,
                 )
             )
 
@@ -399,34 +411,48 @@ class UALossesParser:
         if value is None:
             return None, None
 
-        return self._parse_date(value)
+        return parse_date(value)
 
-    def _parse_date(self, value: str) -> tuple[date, DatePrecision]:
-        value = value.strip()
-        
-        # UA Losses uses "Sept." instead of the standard "Sep."
-        if value.startswith("Sept."):
-            value = value.replace("Sept.", "Sep.", 1)        
-        
-        formats = (
-            "%B %d, %Y",
-            "%b. %d, %Y",
-            "%b %d, %Y",
+
+    # Parses dates from listing page. Formats include:
+    # Jan. 23, 1999 - (Sept. 8, 2024)
+    # ? - July 19, 2025
+    # March 24, 1998 - ?
+    # July 20, 1998 - (May 5, 2025)
+    def _parse_listing_dates(
+        self,
+        value: str,
+    ) -> tuple[
+        date | None,
+        DatePrecision | None,
+        date | None,
+        DatePrecision | None,
+    ]:
+        if " - " not in value:
+            return None, None, None, None
+
+        birth_value, death_value = value.split(
+            " - ",
+            maxsplit=1,
         )
 
-        for fmt in formats:
-            try:
-                parsed_date = datetime.strptime(value, fmt).date()
-                return (parsed_date, DatePrecision.DAY)
+        (
+            date_of_birth,
+            date_of_birth_precision,
+        ) = parse_optional_date(birth_value)
 
-            except ValueError:
-                continue
+        (
+            date_of_death,
+            date_of_death_precision,
+        ) = parse_optional_date(death_value)
 
-        if re.fullmatch(r"\d{4}", value):
-            year = int(value)
-            return (date(year, 1, 1), DatePrecision.YEAR)
+        return (
+            date_of_birth,
+            date_of_birth_precision,
+            date_of_death,
+            date_of_death_precision,
+        )
 
-        raise ValueError(f"Unknown date format: {value}")
 
     def _parse_location_field(
         self,
@@ -513,7 +539,7 @@ class UALossesParser:
         if link is None:
             return None, None, None
 
-        award_date, award_date_precision = self._parse_date(link.get_text(" ", strip=True))
+        award_date, award_date_precision = parse_date(link.get_text(" ", strip=True))
 
         award_url = urljoin(
             BASE_URL,
