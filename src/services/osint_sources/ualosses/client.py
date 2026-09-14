@@ -2,9 +2,9 @@ from requests import Session
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
+from .config import BASE_SOLDIERS_URL
 
 class UALossesClient:
-    BASE_URL = "https://ualosses.org/en/soldiers/"
 
     def __init__(self) -> None:
         self.session = Session()
@@ -50,7 +50,7 @@ class UALossesClient:
             params["direction"] = direction
 
         response = self.session.get(
-            self.BASE_URL,
+            BASE_SOLDIERS_URL,
             params=params,
             timeout=30,
         )
@@ -83,7 +83,7 @@ class UALossesClient:
         }
 
         response = self.session.get(
-            self.BASE_URL,
+            BASE_SOLDIERS_URL,
             params=params,
             timeout=30,
         )

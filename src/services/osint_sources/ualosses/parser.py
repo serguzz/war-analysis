@@ -13,10 +13,10 @@ from .models import (
     MilitaryUnit,
     SoldierListItem
 )
+from .config import BASE_URL
 
 
 class UALossesParser:
-    BASE_URL = "https://ualosses.org"
     
     def __init__(self, client: UALossesClient | None = None) -> None:
         self.client = client or UALossesClient()
@@ -163,7 +163,7 @@ class UALossesParser:
                 continue
 
             url = urljoin(
-                self.BASE_URL,
+                BASE_URL,
                 href,
             )
 
@@ -214,7 +214,7 @@ class UALossesParser:
                 SoldierListItem(
                     last_name=last_name,
                     url=urljoin(
-                        self.BASE_URL,
+                        BASE_URL,
                         href,
                     ),
                 )
@@ -447,7 +447,7 @@ class UALossesParser:
             Place(
                 name=link.get_text(" ", strip=True),
                 url=urljoin(
-                    self.BASE_URL,
+                    BASE_URL,
                     link["href"],
                 ),
             )
@@ -493,7 +493,7 @@ class UALossesParser:
         return MilitaryUnit(
             name=name,
             url=urljoin(
-                self.BASE_URL,
+                BASE_URL,
                 link["href"],
             ),
         )
@@ -516,7 +516,7 @@ class UALossesParser:
         award_date, award_date_precision = self._parse_date(link.get_text(" ", strip=True))
 
         award_url = urljoin(
-            self.BASE_URL,
+            BASE_URL,
             link["href"],
         )
 
@@ -534,7 +534,7 @@ class UALossesParser:
 
         return [
             urljoin(
-                self.BASE_URL,
+                BASE_URL,
                 link["href"],
             )
             for link in section.select("a[href]")

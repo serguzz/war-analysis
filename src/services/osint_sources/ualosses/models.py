@@ -17,10 +17,9 @@ class Place:
 
 @dataclass
 class MilitaryUnit:
-    name: str # e.g., 25th separate airborne brigade
-    url: str | None = None # e.g., https://ualosses.org/en/military_unit/25th-separate-airborne-brigade-a1126/
-    # the url also contains unit numeric name: A1126 (a1126)
-
+    name: str
+    url: str | None = None
+    
 @dataclass
 class Location:
     settlement: Place | None = None
