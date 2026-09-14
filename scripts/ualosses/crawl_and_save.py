@@ -38,22 +38,22 @@ def main():
         service = UALossesService(session)
 
         processed = 0
-        saved = 0
         created = 0
         updated = 0
         errors = 0
 
         #urls = crawler.root_crawl(LIMIT)
-        urls = crawler.crawl_prefix("h")
+        # urls = crawler.crawl_prefix("h")   # "klmnopqrstuvwxyz"
         
-        """urls = set()
-        for symbol in "hijklmnopqrstuvwxyz":
+        urls = set()
+        for symbol in "ij":
             symbol_urls = crawler.crawl_prefix(symbol)
-            logger.info(f"Collected {len(symbol_urls)} URLs")
+            logger.info(f"Collected {len(symbol_urls)} URLs for symbol '{symbol}'")
             urls.update(symbol_urls)
-            """
+            
 
-        logger.info(f"Total collected {len(urls)} URLs")
+        collected_count = len(urls)
+        logger.info(f"Total collected {collected_count} URLs")
 
         for url in sorted(urls):
             if processed >= LIMIT:
@@ -68,11 +68,6 @@ def main():
                     created += 1
                 else:
                     updated += 1
-
-                """print(
-                    f"[OK] {processed} "
-                    f"{url}"
-                )"""
 
             except Exception as exc:
                 errors += 1
@@ -92,7 +87,7 @@ def main():
                     session.commit()
 
                     print(
-                        f"[BATCH] committed {processed} soldiers "
+                        f"[BATCH] committed {processed} of {collected_count} soldiers "
                         f"(created={created}, updated={updated}, saved={created + updated}, errors={errors})"
                     )
 
