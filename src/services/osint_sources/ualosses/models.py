@@ -30,8 +30,11 @@ class Location:
 
 @dataclass
 class SoldierListItem:
-    last_name: str
+    full_name: str
     url: str
+    date_of_birth: date | None = None
+    date_of_death: date | None = None
+    country: str | None = None
 
 
 @dataclass
