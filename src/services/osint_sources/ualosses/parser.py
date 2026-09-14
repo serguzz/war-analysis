@@ -1,9 +1,9 @@
 import re
-from datetime import date, datetime
+from datetime import date
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
-from src.config.countries import COUNTRIES
+from src.config.countries import COUNTRIES, COUNTRY_ALIASES
 
 from .client import UALossesClient
 from .models import (
@@ -14,8 +14,94 @@ from .models import (
     MilitaryUnit,
     SoldierListItem
 )
-from .config import BASE_URL
+from .config import BASE_URL, BASE_SOLDIER_URL
 from src.utils.parser_utils import parse_date, parse_optional_date
+
+
+def parse_soldier_url(url: str) -> SoldierListItem:
+    """
+    Parse available soldier information from a UA Losses
+    soldier page URL.
+
+    Example:
+        https://ualosses.org/en/soldier/
+        ankhel-armando-isko-andrade-liam-1998-06-26-26-colombia/
+
+    Returns:
+        SoldierListItem with information extracted from the URL.
+    """
+    if not url.startswith(BASE_SOLDIER_URL):
+        raise ValueError(
+            f"Unexpected soldier URL: {url}"
+        )
+
+    information = url.removeprefix(
+        BASE_SOLDIER_URL
+    ).strip("/")
+
+    # Find YYYY-MM-DD date inside the slug.
+    match = re.search(
+        r"^(?P<name>.+?)-"
+        r"(?P<date>\d{4}-\d{2}-\d{2})"
+        r"(?:-\d+)?"
+        r"(?:-(?P<country>[^/]+))?$",
+        information,
+    )
+
+    date_of_birth: date | None = None
+
+    if match:
+        name_part = match.group("name")
+        date_value = match.group("date")
+        country_value = match.group("country")
+
+        full_name = name_part.replace("-", " ").title()
+
+        date_of_birth = date.fromisoformat(
+            date_value
+        )
+
+        country = None
+        if country_value:
+            country_value = country_value.replace("-", " ")
+            if country_value in COUNTRY_ALIASES:
+                country = COUNTRY_ALIASES[country_value]
+            elif country_value.title() in COUNTRIES:
+                country = country_value.title()
+
+
+    else:
+        full_name = information.replace(
+            "-",
+            " ",
+        ).title()
+
+        date_of_birth = None
+        country = None
+
+        parts = full_name.split()
+
+        if parts:
+            country_candidate = parts[-1]
+
+            if country_candidate.title() in COUNTRIES:
+                country = country_candidate.title()
+                full_name = " ".join(parts[:-1])
+
+    last_name = (
+        full_name.split(maxsplit=1)[0]
+        if full_name
+        else None
+    )
+
+    return SoldierListItem(
+        url=url,
+        full_name=full_name,
+        last_name=last_name,
+        date_of_birth=date_of_birth,
+        country=country,
+    )
+
 
 class UALossesParser:
     

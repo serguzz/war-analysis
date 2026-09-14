@@ -32,6 +32,7 @@ class Location:
 class SoldierListItem:
     full_name: str
     url: str
+    last_name: str | None = None
     date_of_birth: date | None = None
     date_of_death: date | None = None
     country: str | None = None

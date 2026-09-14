@@ -2,8 +2,9 @@ from datetime import date
 
 import pytest
 
-from src.services.osint_sources.ualosses.models import DatePrecision
-from src.utils.parser_utils import parse_optional_date, parse_date
+from src.services.osint_sources.ualosses.models import DatePrecision, SoldierListItem
+from src.utils.parser_utils import parse_optional_date
+from src.services.osint_sources.ualosses.parser import parse_soldier_url
 
 
 @pytest.mark.parametrize(
@@ -70,7 +71,51 @@ def test_parse_optional_date(
     expected_date: date | None,
     expected_precision: DatePrecision | None,
 ) -> None:
-    parse_optional_date(text) == (
+    assert parse_optional_date(text) == (
         expected_date,
         expected_precision,
+    )
+
+
+@pytest.mark.parametrize(
+    ("url", "full_name", "last_name", "date_of_birth", "country"),
+    [
+        (
+            "https://ualosses.org/en/soldier/ankhel-armando-isko-andrade-liam-1998-06-26-26-colombia/",
+            "Ankhel Armando Isko Andrade Liam",
+            "Ankhel",
+            date(1998, 6, 26),
+            "Colombia",
+        ),
+
+        (
+            "https://ualosses.org/en/soldier/alvarez-ariza-alvaro-antonio-1988-05-03-35-colombia/",
+            "Alvarez Ariza Alvaro Antonio",
+            "Alvarez",
+            date(1988, 5, 3),
+            "Colombia",
+        ),
+
+        (
+            "https://ualosses.org/en/soldier/askerov-faik-takhir-azerbaijan/",
+            "Askerov Faik Takhir",
+            "Askerov",
+            None,
+            "Azerbaijan",
+        ),
+    ],
+)
+def test_parse_soldier_url(
+    url: str,
+    full_name: str,
+    last_name: str | None,
+    date_of_birth: date | None,
+    country: str | None,
+) -> None:
+    assert parse_soldier_url(url) == SoldierListItem(
+        url=url,
+        full_name=full_name,
+        last_name=last_name,
+        date_of_birth=date_of_birth,
+        country=country,
     )
