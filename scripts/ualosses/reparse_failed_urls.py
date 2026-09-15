@@ -58,6 +58,8 @@ def main():
             except Exception as exc:
                 errors += 1
 
+                fallback_soldier = parser.fallback_for_failed_url(url)
+
                 print(
                     f"[ERROR] {processed} "
                     f"{url}: "

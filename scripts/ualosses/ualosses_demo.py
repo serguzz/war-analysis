@@ -8,8 +8,17 @@ from src.services.osint_sources.ualosses import (
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 
+MILITARY_UNIT_NAMES = [
+    "4th-international-legion-junior"
+]
+
+MILITARY_RANKS = ["Soldier", "Senior soldier", "Junior sergeant"]
+
 client = UALossesClient()
-parser = UALossesParser()
+parser = UALossesParser(
+    military_ranks=MILITARY_RANKS,
+    military_unit_names=MILITARY_UNIT_NAMES,
+)
 crawler = UALossesCrawler(
     parser,
     delay_sec=0.2,
@@ -161,16 +170,27 @@ def demo_soldier_parse_and_save(links: list):
                 )
 
 
+def demo_parse_failed_urls(links: list):
+    for link in sorted(links):
+        try:
+            soldier = parser.get_soldier(link)
+        except:
+            soldier = parser.fallback_for_failed_url(link)
+        print(soldier)
+
 
 links = [
     # "https://ualosses.org/en/soldier/andryeyev-oleksij-oleksandrovych-1996-06-30-25-novomoskovsk-25th-separate-airborne-brigade-senior-sergeant/",
     # "https://ualosses.org/en/soldier/derjahin-roman-jurijovych-1972-06-29-50-rubizhne-92nd-separate-mechanized-brigade-senior-soldier/"
     # urls[0],
-    "https://ualosses.org/en/soldier/machacha-vadym-oleksandrovych-1996-04-04-26-halajbyne-16th-separate-motorized-infantry-battalion-soldier/",
+    # "https://ualosses.org/en/soldier/machacha-vadym-oleksandrovych-1996-04-04-26-halajbyne-16th-separate-motorized-infantry-battalion-soldier/",
+    "https://ualosses.org/en/soldier/fernando-perejra-silva-filjo-karlos-1989-08-02-36-brazil-92nd-separate-mechanized-brigade/"
 ]
 
 # demo_soldier_page(links)
-demo_soldier_parse_and_save(links)
+# demo_soldier_parse_and_save(links)
+
+demo_parse_failed_urls(links)
 
 names = [
     "z",
