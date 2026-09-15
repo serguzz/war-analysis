@@ -1,3 +1,5 @@
+MAX_COUNTRY_WORDS = 6
+
 COUNTRIES = [
     "Afghanistan",
     "Albania",
@@ -219,29 +221,14 @@ COUNTRIES = [
 ]
 
 COUNTRY_ALIASES = {
-    "Brazil": "Brazil",
     "Brasil": "Brazil",
-
     "USA": "United States",
     "US": "United States",
-    "United States": "United States",
     "United States of America": "United States",
-
     "UK": "United Kingdom",
-    "United Kingdom": "United Kingdom",
-
-    "Russia": "Russia",
     "Russian Federation": "Russia",
-
     "Czech Republic": "Czechia",
-    "Czechia": "Czechia",
-
-    "Turkey": "Turkey",
     "Türkiye": "Turkey",
-
-    "South Korea": "South Korea",
     "Republic of Korea": "South Korea",
-
-    "North Korea": "North Korea",
     "Democratic People's Republic of Korea": "North Korea",
 }

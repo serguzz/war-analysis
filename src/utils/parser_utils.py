@@ -39,3 +39,12 @@ def parse_date(value: str) -> tuple[date, DatePrecision]:
         return (date(year, 1, 1), DatePrecision.YEAR)
 
     raise ValueError(f"Unknown date format: {value}")
+
+
+# Transforms string to URL slug, e.g., Test Url Thing -> test-url-thing
+def to_slug(value: str) -> str:
+    return re.sub(
+        r"-+",
+        "-",
+        re.sub(r"\s+", "-", value.strip().lower()),
+    )

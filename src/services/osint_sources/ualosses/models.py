@@ -34,8 +34,13 @@ class SoldierListItem:
     url: str
     last_name: str | None = None
     date_of_birth: date | None = None
+    date_of_birth_precision: DatePrecision | None = None
     date_of_death: date | None = None
+    date_of_death_precision: DatePrecision | None = None
     country: str | None = None
+    military_unit_name: str | None = None
+    rank: str | None = None
+    age: int | None = None
 
 
 @dataclass
@@ -74,3 +79,5 @@ class Soldier:
 
     sources: list[str] | None = None
     additional_sources: list[str] | None = None
+
+    country: str | None = None

@@ -2,8 +2,8 @@ import re
 from datetime import date
 from urllib.parse import urljoin
 
-from bs4 import BeautifulSoup
-from src.config.countries import COUNTRIES, COUNTRY_ALIASES
+from bs4 import BeautifulSoup, Tag
+from src.config.countries import COUNTRIES, COUNTRY_ALIASES, MAX_COUNTRY_WORDS
 
 from .client import UALossesClient
 from .models import (
@@ -15,10 +15,99 @@ from .models import (
     SoldierListItem
 )
 from .config import BASE_URL, BASE_SOLDIER_URL
-from src.utils.parser_utils import parse_date, parse_optional_date
+from src.utils.parser_utils import parse_date, parse_optional_date, to_slug
 
 
-def parse_soldier_url(url: str) -> SoldierListItem:
+def resolve_country(value: str | None) -> str | None:
+    """
+    Resolve a hyphen- or space-separated slug fragment (e.g. "united-kingdom")
+    to a known, canonically-cased country name, or None if it isn't one.
+
+    Country matching is case-insensitive.    
+    """
+    if not value:
+        return None
+ 
+    normalized = value.replace("-", " ").strip().lower()
+ 
+    # Check aliases case-insensitively.
+    for alias, country in COUNTRY_ALIASES.items():
+        if alias.lower() == normalized:
+            return country
+
+    # Check canonical country names case-insensitively.
+    for country in COUNTRIES:
+        if country.lower() == normalized:
+            return country
+ 
+    return None
+
+
+def split_trailing_country(slug: str) -> tuple[str, str | None]:
+    """
+    Peel a known country off the end of a hyphenated slug that has no other
+    structural marker to anchor the split (no date of birth, no age) - i.e.
+    slugs shaped like "name-parts-country".
+ 
+    Tries the last 1..N hyphen-separated tokens, longest first, so
+    multi-word countries ("united-kingdom") are recognized before a
+    shorter, incorrect single-word match would be considered.
+ 
+    Returns (remaining_name_slug, country_or_None).
+    """
+    tokens = slug.split("-")
+ 
+    max_words = min(MAX_COUNTRY_WORDS, len(tokens) - 1)
+ 
+    for word_count in range(max_words, 0, -1):
+        candidate = "-".join(tokens[-word_count:])
+        country = resolve_country(candidate)
+ 
+        if country:
+            return "-".join(tokens[:-word_count]), country
+ 
+    return slug, None
+
+
+def find_military_unit(
+    information: str,
+    military_units: list[MilitaryUnit],
+) -> MilitaryUnit | None:
+    for military_unit in sorted(
+        military_units,
+        key=lambda unit: len(to_slug(unit.name)),
+        reverse=True,
+    ):
+        unit_slug = to_slug(military_unit.name)
+
+        if unit_slug in information:
+            return military_unit
+
+    return None
+
+
+def find_military_rank(
+    information: str,
+    military_ranks: list[str],
+) -> str | None:
+    for military_rank in sorted(
+        military_ranks,
+        key=lambda rank: len(to_slug(rank)),
+        reverse=True,
+    ):
+        rank_slug = to_slug(military_rank)
+
+        if rank_slug in information:
+            return military_rank
+
+    return None
+
+
+def parse_soldier_url(
+    url: str,
+    military_units: list[MilitaryUnit] | None = None,
+    military_ranks: list[str] | None = None,
+    ) -> SoldierListItem:
     """
     Parse available soldier information from a UA Losses
     soldier page URL.
@@ -39,54 +128,84 @@ def parse_soldier_url(url: str) -> SoldierListItem:
         BASE_SOLDIER_URL
     ).strip("/")
 
-    # Find YYYY-MM-DD date inside the slug.
+    ## Try to parse military unit name
+    military_unit_name = None
+
+    if military_units:
+        military_unit = find_military_unit(
+            information,
+            military_units,
+        )
+
+        if military_unit:
+            military_unit_name = military_unit.name
+            information = information.replace(
+                to_slug(military_unit.name),
+                "",
+                1,
+            ).strip("-")
+
+    ## Try to parse military rank
+    rank = None
+
+    if military_ranks:
+        rank = find_military_rank(
+            information,
+            military_ranks,
+        )
+
+        if rank:
+            information = information.replace(
+                to_slug(rank),
+                "",
+                1,
+            ).strip("-")
+
+    full_name: str
+    date_of_birth: date | None = None
+    age: int | None = None
+    country: str | None = None
+ 
+    # Shape 1: name-YYYY-MM-DD[-age][-country]
+    # The date is an unambiguous anchor, so age/country can stay optiona
     match = re.search(
         r"^(?P<name>.+?)-"
         r"(?P<date>\d{4}-\d{2}-\d{2})"
-        r"(?:-\d+)?"
+        r"(?:-(?P<age>\d+))?"
         r"(?:-(?P<country>[^/]+))?$",
         information,
     )
 
-    date_of_birth: date | None = None
-
     if match:
-        name_part = match.group("name")
-        date_value = match.group("date")
-        country_value = match.group("country")
+        full_name = match.group("name").replace("-", " ").title()
+        date_of_birth = date.fromisoformat(match.group("date"))
+        if match.group("age"):
+            age = int(match.group("age"))
 
-        full_name = name_part.replace("-", " ").title()
-
-        date_of_birth = date.fromisoformat(
-            date_value
-        )
-
-        country = None
-        if country_value:
-            country_value = country_value.replace("-", " ")
-            if country_value in COUNTRY_ALIASES:
-                country = COUNTRY_ALIASES[country_value]
-            elif country_value.title() in COUNTRIES:
-                country = country_value.title()
-
+        country = resolve_country(match.group("country"))
 
     else:
-        full_name = information.replace(
-            "-",
-            " ",
-        ).title()
+        # Shape 2: name-age-country (no date of birth).
+        # Age (a run of digits) is the anchor here, so it must be present -
+        # otherwise there's nothing to unambiguously separate name from
+        # country and we fall through to shape 3.
+        match = re.search(
+            r"^(?P<name>.+?)-"
+            r"(?P<age>\d+)-"
+            r"(?P<country>[^/]+)$",
+            information,
+        )
 
-        date_of_birth = None
-        country = None
+        if match:
+            full_name = match.group("name").replace("-", " ").title()
+            age = int(match.group("age"))
+            country = resolve_country(match.group("country"))
 
-        parts = full_name.split()
-
-        if parts:
-            country_candidate = parts[-1]
-
-            if country_candidate.title() in COUNTRIES:
-                country = country_candidate.title()
-                full_name = " ".join(parts[:-1])
+        else:
+            # Shape 3: no date, no age - just name[-country]. No structural
+            # anchor exists, so we peel a known country off the end instead.
+            name_slug, country = split_trailing_country(information)
+            full_name = name_slug.replace("-", " ").title()
 
     last_name = (
         full_name.split(maxsplit=1)[0]
@@ -100,13 +219,23 @@ def parse_soldier_url(url: str) -> SoldierListItem:
         last_name=last_name,
         date_of_birth=date_of_birth,
         country=country,
+        military_unit_name=military_unit_name,
+        rank=rank,
+        age=age,
     )
 
 
 class UALossesParser:
     
-    def __init__(self, client: UALossesClient | None = None) -> None:
+    def __init__(
+        self,
+        client: UALossesClient | None = None,
+        military_units: list[MilitaryUnit] | None = None,  # list of military units
+        military_ranks: list | None = None, # list of possible ranks
+        ) -> None:
         self.client = client or UALossesClient()
+        self.military_units = military_units or []
+        self.military_ranks = military_ranks or []
 
     def get_people_count(
         self,
@@ -293,14 +422,21 @@ class UALossesParser:
                 continue
             
             date_of_birth=None
+            date_of_birth_precision=None
             date_of_death=None
+            date_of_death_precision=None
             country=None
 
             parent_item = link.find_parent("li")
             if parent_item is not None:
                 for text in parent_item.stripped_strings:
                     if " - " in text:
-                        date_of_birth, _, date_of_death, _ = self._parse_listing_dates(text)
+                        (
+                            date_of_birth,
+                            date_of_birth_precision,
+                            date_of_death,
+                            date_of_death_precision
+                        ) = self._parse_listing_dates(text)
 
                     elif text in COUNTRIES:
                         country = text
@@ -313,7 +449,9 @@ class UALossesParser:
                         href,
                     ),
                     date_of_birth=date_of_birth,
+                    date_of_birth_precision=date_of_birth_precision,
                     date_of_death=date_of_death,
+                    date_of_death_precision=date_of_death_precision,
                     country=country,
                 )
             )
@@ -443,6 +581,57 @@ class UALossesParser:
                 ".additional-sources",
             ),
         )
+
+
+    def fallback_for_failed_url(self, url: str) -> Soldier | None:
+        soldier_item_from_url = parse_soldier_url(
+            url,
+            self.military_units,
+            self.military_ranks
+        )
+        last_name = soldier_item_from_url.last_name
+
+        if self.get_found_count(last_name) > 100:
+            raise ValueError(
+                f"More than 1 page found for: {last_name} listing. "
+                f"Try narrowing the last_name search."
+            )
+        
+        soldier_list_items = self.get_soldiers_listing(1, soldier_item_from_url.last_name)
+
+        match_soldier = None
+
+        for item in soldier_list_items:
+            if item.url == soldier_item_from_url.url:
+                match_soldier = item
+                break
+
+        if match_soldier is None:
+            return None
+
+        # Military Unit taken from URL, since page listings don't display unit
+        # military_unit = MilitaryUnit(soldier_item_from_url.military_unit_name)
+
+        military_unit = next(
+            (
+                unit
+                for unit in self.military_units
+                if unit.name == soldier_item_from_url.military_unit_name
+            ),
+            None,
+        )
+
+        return Soldier(
+            name=match_soldier.full_name,
+            source_url=url,
+            date_of_birth=match_soldier.date_of_birth,
+            date_of_birth_precision=match_soldier.date_of_birth_precision,
+            date_of_death=match_soldier.date_of_death,
+            date_of_death_precision=match_soldier.date_of_death_precision,
+            country=match_soldier.country,
+            military_unit=military_unit,
+        )
+
 
     def _parse_name(self, soup: BeautifulSoup) -> str:
         title = soup.select_one(".soldier-title-block h1")
