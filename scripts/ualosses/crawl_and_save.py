@@ -43,10 +43,10 @@ def main():
         errors = 0
 
         #urls = crawler.root_crawl(LIMIT)
-        # urls = crawler.crawl_prefix("h")   # "mnopqrstuvwxyz"
+        # urls = crawler.crawl_prefix("h")   # "nopqrstuvwxyz"
         
         urls = set()
-        for symbol in "kl":
+        for symbol in "m":
             symbol_urls = crawler.crawl_prefix(symbol)
             logger.info(f"Collected {len(symbol_urls)} URLs for symbol '{symbol}'")
             urls.update(symbol_urls)
