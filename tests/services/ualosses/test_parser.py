@@ -325,6 +325,26 @@ def test_parse_optional_date(
         None,
         12,
     ),
+    (
+        "https://ualosses.org/en/soldier/merfi-test-tester-united-kingdom/",
+        "Merfi Test Tester",
+        "Merfi",
+        None,
+        "United Kingdom",
+        None,
+        None,
+        None,
+    ),
+    (
+        "https://ualosses.org/en/soldier/meolikkk-tester-united-states/",
+        "Meolikkk Tester",
+        "Meolikkk",
+        None,
+        "United States",
+        None,
+        None,
+        None,
+    ),    
 ],
 )
 def test_parse_soldier_url(
