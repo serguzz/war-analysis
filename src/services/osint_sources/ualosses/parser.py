@@ -202,10 +202,22 @@ def parse_soldier_url(
             country = resolve_country(match.group("country"))
 
         else:
-            # Shape 3: no date, no age - just name[-country]. No structural
-            # anchor exists, so we peel a known country off the end instead.
-            name_slug, country = split_trailing_country(information)
-            full_name = name_slug.replace("-", " ").title()
+            # Shape 3: name-age
+            match = re.search(
+                r"^(?P<name>.+?)-"
+                r"(?P<age>\d+)$",
+                information,
+            )
+
+            if match:
+                full_name = match.group("name").replace("-", " ").title()
+                age = int(match.group("age"))
+
+            else:
+                # Shape 4: no date, no age - just name[-country]. No structural
+                # anchor exists, so we peel a known country off the end instead.
+                name_slug, country = split_trailing_country(information)
+                full_name = name_slug.replace("-", " ").title()
 
     last_name = (
         full_name.split(maxsplit=1)[0]

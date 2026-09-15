@@ -305,6 +305,26 @@ def test_parse_optional_date(
         "Soldier",
         46,
     ),
+    (
+        "https://ualosses.org/en/soldier/testvili-alyeksandr-24-georgia/",
+        "Testvili Alyeksandr",
+        "Testvili",
+        None,
+        "Georgia",
+        None,
+        None,
+        24,
+    ),
+    (
+        "https://ualosses.org/en/soldier/testvili-alyeksandr-12/",
+        "Testvili Alyeksandr",
+        "Testvili",
+        None,
+        None,
+        None,
+        None,
+        12,
+    ),
 ],
 )
 def test_parse_soldier_url(
